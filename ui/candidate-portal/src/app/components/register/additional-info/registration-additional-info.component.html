@@ -1,0 +1,80 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="container">
+
+  <app-loading [loading]="loading"></app-loading>
+  <app-error [error]="error"></app-error>
+
+  <ng-container *ngIf="!loading">
+
+    <form [formGroup]="form">
+
+      <div class="mb-3">
+        <label class="fw-bold form-label" for="additionalInfo">
+          {{ 'REGISTRATION.SUBMIT.LABEL.ADDITIONALINFO' | translate }}
+        </label>
+        <textarea id="additionalInfo" class="md-textarea-auto form-control" rows="5"
+                  [formControlName]="'additionalInfo'"></textarea>
+      </div>
+
+      <div *ngIf="!usAfghan">
+        <div class="mb-3">
+          <label class="form-label" for="surveyTypeId">
+            {{ 'REGISTRATION.SUBMIT.LABEL.SURVEY' | translate }} <sup>*</sup>
+          </label>
+          <ng-select id="surveyTypeId" [formControlName]="'surveyTypeId'" [items]="surveyTypes" [clearable]="false"
+                     bindLabel="name" bindValue="id" placeholder="{{ 'FORM.PLACEHOLDER.SELECT' | translate }}">
+          </ng-select>
+        </div>
+
+        <ng-container *ngIf="form.controls.surveyTypeId.value !== ''">
+          <div class="mb-3">
+            <label class="fw-bold form-label" for="surveyComment">
+              {{ 'REGISTRATION.SUBMIT.LABEL.COMMENT' | translate }}
+            </label>
+            <input type="text" class="form-control" id="surveyComment" placeholder="" [formControlName]="'surveyComment'">
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="mb-3">
+        <div>
+          <label class="form-label" for="linkedInLink">
+            {{ 'REGISTRATION.SUBMIT.LINKEDIN.LABEL' | translate }}
+          </label>
+        </div>
+        <div class="d-flex align-items-center">
+          <input type="text" class="form-control" id="linkedInLink"
+                 formControlName="linkedInLink" placeholder="https://www.linkedin.com/in/...">
+        </div>
+      </div>
+      <div *ngIf="form.controls.linkedInLink.invalid && (form.controls.linkedInLink.dirty || form.controls.linkedInLink.touched)"
+           class="alert alert-danger">
+        {{ 'REGISTRATION.SUBMIT.LINKEDIN.WARN' | translate }}
+      </div>
+
+    </form>
+
+  </ng-container>
+
+</div>
+
+<app-registration-footer [nextDisabled]="loading || saving || form?.invalid"
+                         [type]="edit ? 'update' : 'step'"
+                         (backClicked)="edit ? cancel() : save('back') "
+                         (nextClicked)="save('next')">
+</app-registration-footer>

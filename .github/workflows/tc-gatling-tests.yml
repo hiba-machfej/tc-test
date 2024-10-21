@@ -1,0 +1,44 @@
+name: TC Gatling Tests
+
+on:
+  push:
+    branches:
+      - staging
+
+  workflow_dispatch: # this attribute enables manual runs of this workflow
+
+jobs:
+  run-tests:
+    # This job is intentionally disabled because the Gatling Tests are currently failing.
+    # The 'if: false' condition effectively prevents this job from running under any circumstances.
+    # This will remain in place until the SDET has a chance to review and set appropriate performance
+    # test benchmarks and a spin-up/tear-down perf environment is in place.
+    if: false # this attribute disables the job
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Gatling Tests
+        run: ./gradlew performance-test:build
+        env:
+          DB_URL: ${{ secrets.STAGING_DB_URL }}
+          DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+
+      - name: Archive Gatling Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Gatling Reports
+          path: performance-tests/build/reports/gatling
+          if-no-files-found: error

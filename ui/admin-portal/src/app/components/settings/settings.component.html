@@ -1,0 +1,145 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<nav ngbNav #nav="ngbNav" class="nav-tabs" [activeId]="activeTabId" (navChange)="onTabChanged($event)">
+
+  <!-- Users -->
+  <ng-container ngbNavItem="users">
+    <a ngbNavLink>Users</a>
+    <ng-template ngbNavContent>
+      <app-search-users [loggedInUser]="loggedInUser">
+      </app-search-users>
+    </ng-template>
+  </ng-container>
+
+  <!--System admin only settings tabs-->
+  <ng-container *ngIf="systemAdminOnly()">
+    <!-- Partners -->
+    <ng-container ngbNavItem="Partners">
+      <a ngbNavLink>Partners</a>
+      <ng-template ngbNavContent>
+        <app-search-partners>
+        </app-search-partners>
+      </ng-template>
+    </ng-container>
+
+    <!-- Languages -->
+    <ng-container ngbNavItem="languages">
+      <a ngbNavLink>Languages</a>
+      <ng-template ngbNavContent>
+        <app-search-languages [loggedInUser]="loggedInUser">
+        </app-search-languages>
+      </ng-template>
+    </ng-container>
+
+    <!-- Occupations -->
+    <ng-container ngbNavItem="occupations">
+      <a ngbNavLink>Occupations</a>
+      <ng-template ngbNavContent>
+        <app-search-occupations [loggedInUser]="loggedInUser">
+        </app-search-occupations>
+      </ng-template>
+    </ng-container>
+
+    <!-- Language Levels -->
+    <ng-container ngbNavItem="langlevels">
+      <a ngbNavLink>Language Levels</a>
+      <ng-template ngbNavContent>
+        <app-search-language-levels [loggedInUser]="loggedInUser">
+        </app-search-language-levels>
+      </ng-template>
+    </ng-container>
+
+    <!-- Education -->
+    <ng-container ngbNavItem="edulevels">
+      <a ngbNavLink>Education Levels</a>
+      <ng-template ngbNavContent>
+        <app-search-education-levels [loggedInUser]="loggedInUser">
+        </app-search-education-levels>
+      </ng-template>
+    </ng-container>
+
+    <!-- Education Majors -->
+    <ng-container ngbNavItem="majors">
+      <a ngbNavLink>Education Majors</a>
+      <ng-template ngbNavContent>
+        <app-search-education-majors [loggedInUser]="loggedInUser">
+        </app-search-education-majors>
+      </ng-template>
+    </ng-container>
+
+    <!-- Translations -->
+    <ng-container ngbNavItem="translations-general">
+      <a ngbNavLink>Translations (general)</a>
+      <ng-template ngbNavContent>
+        <app-general-translations [loggedInUser]="loggedInUser">
+        </app-general-translations>
+      </ng-template>
+    </ng-container>
+
+    <!-- Translations -->
+    <ng-container ngbNavItem="translations-dropdowns">
+      <a ngbNavLink>Translations (dropdowns)</a>
+      <ng-template ngbNavContent>
+        <app-dropdown-translations [loggedInUser]="loggedInUser">
+        </app-dropdown-translations>
+      </ng-template>
+    </ng-container>
+
+    <!-- Admin API -->
+    <ng-container ngbNavItem="Admin API">
+      <a ngbNavLink>Admin API</a>
+      <ng-template ngbNavContent>
+        <app-admin-api>
+        </app-admin-api>
+      </ng-template>
+    </ng-container>
+
+  </ng-container>
+
+  <ng-container *ngIf="canSeeExternalLinksAndTasks()">
+    <!-- External Links -->
+    <ng-container ngbNavItem="links">
+      <a ngbNavLink>External Links</a>
+      <ng-template ngbNavContent>
+        <app-search-external-links [loggedInUser]="loggedInUser">
+        </app-search-external-links>
+      </ng-template>
+    </ng-container>
+
+    <!-- Tasks -->
+    <ng-container ngbNavItem="Tasks">
+      <a ngbNavLink>Tasks</a>
+      <ng-template ngbNavContent>
+        <app-search-tasks [loggedInUser]="loggedInUser">
+        </app-search-tasks>
+      </ng-template>
+    </ng-container>
+  </ng-container>
+
+  <!-- Helps Links -->
+  <ng-container ngbNavItem="help-links">
+    <a ngbNavLink>Help Links</a>
+    <ng-template ngbNavContent>
+      <app-search-help-links>
+      </app-search-help-links>
+    </ng-template>
+  </ng-container>
+
+</nav>
+<div [ngbNavOutlet]="nav" class="mt-2"></div>
+
+

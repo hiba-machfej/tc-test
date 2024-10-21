@@ -1,0 +1,58 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="text-end" *ngIf="!preview">
+
+  <button class="btn btn-danger btn-card"
+          [disabled]="disabled"
+          (click)="delete()">
+    &times;
+  </button>
+
+  <button class="btn btn-primary btn-card pb-1"
+          [disabled]="disabled"
+          (click)="edit()">
+    <fa-icon icon="edit" size="xs"></fa-icon>
+  </button>
+
+</div>
+
+<p class="job-title">{{experience?.role}}</p>
+
+<p>{{experience?.companyName}}</p>
+
+<div class="row">
+
+  <div class="col-12 col-md-4 text-start">
+    <span class="icon"></span>
+    {{getCountryName(experience.country)}}
+  </div>
+  <div class="col-12 col-md-4 text-start">
+    <span class="icon"></span>
+    <span *ngIf="experience?.fullTime === true">{{ 'CARD.JOBEXPERIENCE.LABEL.FULLTIME' | translate }}</span>
+    <span *ngIf="experience?.fullTime === false">{{ 'CARD.JOBEXPERIENCE.LABEL.PARTTIME' | translate }}</span>,
+    <span *ngIf="experience?.paid === true">{{ 'CARD.JOBEXPERIENCE.LABEL.PAID' | translate }}</span>
+    <span *ngIf="experience?.paid === false">{{ 'CARD.JOBEXPERIENCE.LABEL.VOLUNTEER' | translate }}</span>
+  </div>
+  <div class="col-12 col-md-4 text-start">
+    <span class="icon"></span>
+    {{experience?.startDate ? (experience?.startDate | date: 'yyyy') : '?'}} - {{experience?.endDate ? (experience?.endDate | date: 'yyyy') : 'current'}}
+  </div>
+
+</div>
+
+<p class="text-muted" [ngClass]="isHtml(experience?.description)?'html':'text'" [innerHTML]="experience?.description"></p>
+

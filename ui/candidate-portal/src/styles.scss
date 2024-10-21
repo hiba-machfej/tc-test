@@ -1,0 +1,97 @@
+/*!
+ * Copyright (c) 2021 Talent Beyond Boundaries.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
+/* You can add global styles to this file, and also import other style files */
+@import "scss/typography";
+@import "scss/nav";
+@import "scss/btn";
+@import "scss/overrides";
+@import "scss/chat";
+
+@import "scss/rtl";
+
+/* Component specific styles */
+@import "scss/component/registration-step";
+
+@import "~@ng-select/ng-select/themes/default.theme.css";
+@import "quill/dist/quill.snow.css";
+@import 'quill/dist/quill.bubble.css';
+
+
+// Card specific
+.card {
+  &.parent-card {
+    .card {
+      padding: 0;
+      box-shadow: none;
+    }
+    h5 {
+      font-weight: 700;
+    }
+  }
+
+}
+
+/* FONT AWESOME */
+label > i.fa {
+  margin-right: 8px;
+}
+
+//a.is-link, a > i.is-link {
+//  color: $color-primary;
+//  cursor: pointer;
+//  @include hover() {
+//    color: $color-primary-dark;
+//  }
+//}
+
+.text-alert {
+  color: #ed770f;
+}
+
+section {
+  margin-top: 2rem;
+  h5, h6 {
+    font-weight: 700;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .form-group label {
+    font-size: 14px;
+  }
+}
+
+label {
+  font-weight: 700;
+}
+
+// ngx-quill : quill-editor custom styles
+.ql-toolbar {
+  background-color: white;
+}
+
+.ql-container {
+  background-color: white;
+}
+
+.nav-link {
+  cursor: pointer;
+}
+
+.link {
+  cursor: pointer;
+}

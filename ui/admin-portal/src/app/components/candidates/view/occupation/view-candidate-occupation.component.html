@@ -1,0 +1,105 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<!-- LOADING -->
+<div *ngIf="loading">
+  <i class="fas fa-spinner fa-spin"></i> loading...
+</div>
+
+<!-- ERROR -->
+<div *ngIf="error">
+  {{error}}
+</div>
+
+<ng-container *ngIf="!loading">
+
+  <div class="dropdown my-2" ngbDropdown>
+    <!-- ADD OCCUPATION BTN-->
+    <div class="float-end" *ngIf="editable && adminUser">
+      <button class="btn btn-sm btn-primary" (click)="createCandidateOccupation()">
+        <i class="fas fa-plus"></i> Occupation
+      </button>
+    </div>
+    <!-- ORDER BY -->
+    <a class="dropdown-toggle btn btn-sm" ngbDropdownToggle>
+      Order By {{orderOccupation ? 'Occupation' : 'Date'}}
+    </a>
+    <div class="dropdown-menu dropdown-menu-right" ngbDropdownMenu>
+      <a class="dropdown-item" (click)="orderOccupation = true">Occupation</a>
+      <a class="dropdown-item" (click)="orderOccupation = false">Date</a>
+    </div>
+  </div>
+
+  <!-- OCCUPATION VIEW -->
+  <ng-container *ngIf="orderOccupation">
+
+    <app-view-candidate-job-experience *ngFor="let occupation of candidateOccupations"
+                                       [candidate]="candidate"
+                                       [candidateOccupation]="occupation"
+                                       [editable]="editable"
+                                       [adminUser]="adminUser"
+                                       (deleteOccupation)="deleteCandidateOccupation($event)">
+    </app-view-candidate-job-experience>
+
+  </ng-container>
+
+  <!-- EXPERIENCE VIEW -->
+  <ng-container *ngIf="!orderOccupation">
+
+    <div class="card mb-4" *ngFor="let experience of experiences">
+
+      <!-- HEADER -->
+      <div class="card-header">
+        <span>{{experience.role}}</span>
+
+        <div class="float-end" *ngIf="editable">
+          <button type="button" class="btn btn-default" (click)="editCandidateJobExperience(experience)"><i
+            class="fas fa-edit"></i></button>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="card-body">
+
+        <div class="row">
+          <!-- DESCRIPTION -->
+          <div class="col-12" *ngIf="experience.description" [innerHtml]="experience.description">
+          </div>
+
+          <!-- COMPANY DETAILS -->
+          <div class="col-12">
+            <span>{{experience.companyName}}, {{experience.country.name}}</span>
+          </div>
+
+          <!-- DATES -->
+          <div class="col-12">
+            <span class="text-muted small">{{experience.startDate | date }} - {{experience.endDate | date }}</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="text-center" *ngIf="hasMore">
+      <button class="btn btn-primary" (click)="loadJobExperiences(true)">Load more</button>
+    </div>
+
+  </ng-container>
+
+</ng-container>
+

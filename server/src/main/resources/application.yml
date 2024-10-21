@@ -1,0 +1,247 @@
+tbb:
+  cors:
+    urls: ${TBB_CORS_URLS:http://localhost:4200,http://localhost:4201,http://localhost:4202}
+
+  destinations: ${TBB_DESTINATIONS:Australia,Canada,New Zealand,United Kingdom}
+  partner-dbcopy-config: ${TBB_PARTNER_DBCOPY_CONFIG:data.sharing/tbbCopiesTest.xml}
+
+logging:
+  level:
+    reactor:
+      netty:
+        http:
+          client: INFO
+    org:
+      hibernate:
+        boot:
+          internal:
+            #Gets rid of DuplicateSeqGen errors at start up.
+            #Caused by Entity inheritance from org/tctalent/server/model/db/AbstractDomainObject.java
+            #See notes in that class
+            InFlightMetadataCollectorImpl: ERROR
+      springframework:
+        web:
+          filter:
+            # Enable HTTP request logging by setting this to DEBUG
+            CommonsRequestLoggingFilter: INFO
+        data:
+          convert:
+            #Gets rid of registering converter warnings at start up
+            #See https://stackoverflow.com/questions/60001034/how-to-remove-spring-data-customconversions-warnings-from-application-startup
+            CustomConversions: ERROR
+
+spring:
+  autoconfigure:
+    exclude:
+      # We only want to use Redis as a cache so we do not want it to auto configure as a data store
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+  servlet:
+    multipart:
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:10MB}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:10MB}
+
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URL:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
+
+  cache:
+    type: redis
+    redis:
+        time-to-live: 300000
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+
+  data:
+    # We explicitly enable repositories with @EnableJpaRepositories and
+    # @EnableElasticsearchRepositories.
+    # Turn off default enabling to avoid errors
+    # jpa has to be enabled otherwise unit tests fail
+    # - see https://stackoverflow.com/questions/47002094/spring-multiple-spring-data-modules-found-entering-strict-repository-configur
+    jpa:
+      repositories:
+        enabled: true
+    elasticsearch:
+      repositories:
+        enabled: false
+
+  thymeleaf:
+    prefix: classpath:/mail/
+
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tctalent}
+    username: tctalent
+    password: ${SPRING_DATASOURCE_PASSWORD:tctalent}
+    hikari:
+      maximum-pool-size: ${SPRING_DBPOOL_MAX:10}
+      minimum-idle:  ${SPRING_DBPOOL_MIN:10}
+      max-lifetime: ${SPRING_DBPOOL_MAX_LIFETIME:1800000} # 30 minutes
+
+#  To catch resource not found errors (404)
+#  See https://stackoverflow.com/questions/36733254/spring-boot-rest-how-to-configure-404-resource-not-found/36734193#36734193
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+  web:
+    resources:
+      add-mappings: false
+
+
+  jpa:
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        order_by.default_null_ordering: last
+        temp:
+          use_jdbc_metadata_defaults: false
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
+
+jwt:
+  secret: ${JWT_SECRET:RX4bokONoSrrNLM6CMTij9iG9jHFG5VfsN1zIi9UqDGK3pQXASG7xMEga2VrAj3P1SNmywqnWRoTXnltuJ5l+A==}
+  # This equates to 24 hours in milliseconds
+  expirationInMs: 86400000
+
+salesforce:
+  # Security is set up using a self signed certificate generated using openssl:
+  # eg
+  # openssl req -x509 -newkey rsa:1024 -nodes -keyout key.pem -out cert.pem -days 36500 -subj "/O=Talent Beyond Boundaries/CN=www.talentbeyondboundaries.org"
+  # The key.pem becomes the private key below.
+  # The cert.pem needs to be uploaded to the Salesforce tbbtalent Connected App.
+  # (Note that you can only do the certificate upload from Setup|Apps|AppManager
+  # - then selecting Edit. Bizarrely, you can't do it from
+  # Setup|Apps|ConnectedApps|Manage Connected Apps)
+  #
+  # For dev this should be set in tbb-secrets
+  #
+  # We use the same SF connected app and key/certificate for TC dev and staging to access our SF sandbox, but other URLs and access credentials are different and therefore defined below and designated per environment.
+  privatekey: ${SF_PRIVATE_KEY:}
+  baseClassicUrl: ${SF_BASE_CLASSIC_URL:https://talentbeyondboundaries--sfstaging.sandbox.my.salesforce.com/}
+  baseLightningUrl: ${SF_BASE_LIGHTNING_URL:https://talentbeyondboundaries--sfstaging.sandbox.lightning.force.com}
+  baseLoginUrl: ${SF_BASE_LOGIN_URL:https://test.salesforce.com/}
+  consumerKey: ${SF_CONSUMER_KEY:}
+  user: ${SF_USER:}
+
+  daysAgoRecent: 7
+  recordType:
+    employerJob: 0121N000001890wQAA
+  tbb:
+    jordanAccount: 0013l00002Jm1rRAAR
+    lebanonAccount: 0013l00002Jm2sqAAB
+    otherAccount: 0013l00002JmHQhAAN
+    tbbAccount: 0011N00001DouDKQAZ
+
+slack:
+  workspace: https://refugeejobsmarket.slack.com
+  channelId: ${SLACK_CHANNEL_ID:C048GS1KHPG}
+  token: ${SLACK_TOKEN}
+
+server:
+#  See https://docs.spring.io/spring-boot/docs/2.7.0/reference/htmlsingle/#howto.webserver.use-behind-a-proxy-server
+  forward-headers-strategy: NATIVE
+  tomcat:
+    redirect-context-root: false
+
+#  todo Unused?
+  url: https://tctalent.org
+web:
+  # Used in EmailHelper
+  portal: https://tctalent.org/candidate-portal
+
+  # This is used in EmailHelper
+  # and SiteRedirectController to redirect urls from the Version 1 TC to the Version 2 TC
+  admin: https://tctalent.org/admin-portal
+
+flyway:
+  ignoreMissingMigrations: false
+
+#  Set this to true if you need to repair the Flyway history.
+  repair: false
+
+google:
+  drive:
+  #  These are the credentials set up in the Google Drive API for the TalentCatalog project
+  #  see https://console.developers.google.com/apis/api/drive.googleapis.com/
+
+    clientId: ${GOOGLE_DRIVE_CLIENTID:100905261598930740359}
+    clientEmail: ${GOOGLE_DRIVE_CLIENTEMAIL:talentcatalogdrive@talentcatalog.iam.gserviceaccount.com}
+    projectId: ${GOOGLE_DRIVE_PROJECTID:talentcatalog}
+    tokenUri: ${GOOGLE_DRIVE_TOKENURI:https://oauth2.googleapis.com/token}
+
+  # For dev these should be set in tbb-secrets
+    privateKey: ${GOOGLE_DRIVE_PRIVATEKEY:}
+    privateKeyId: ${GOOGLE_DRIVE_PRIVATEKEYID:}
+
+  # We use a different Google Drive in dev than we do in production.
+  # The Drive and folder ids are the latter part of the url you see when you
+  # go to that drive or folder.
+    candidateDataDriveId: ${GOOGLE_DRIVE_CANDIDATEDATADRIVEID:0AEU3NTgcBsXLUk9PVA}
+    candidateRootFolderId: ${GOOGLE_DRIVE_CANDIDATEROOTFOLDERID:1BzvSDpgRE3hgQHM6bL7LOVWomsWmW28j}
+    listFoldersDriveId:  ${GOOGLE_DRIVE_LISTFOLDERSDRIVEID:0AJpRzZk9D_kLUk9PVA}
+    listFoldersRootId:  ${GOOGLE_DRIVE_LISTFOLDERSROOTID:1BkMPOr392ubCriQdhBAmFKxlume-c7d2}
+
+  # Job Opportunity Intake template
+    jobOppIntakeTemplateId: 1iDEfXhEaTU-c_Znen-_cR3YIRTl7Mnl2UY-sUeZGH3k
+
+  # Published doc sheet template
+    publishedSheetTemplateId: 1On2FJP54Qu3hojQj0fyZLy7PaIitIfIsQCBJFe_1JS0
+  # Name of range (ie a Named range in the Google sheet) where candidate data should be written
+  # (including the header line)
+    publishedSheetDataRangeName: candidateDataRange
+
+  # Pixel width of narrow columns in generated published sheets
+    publishedSheetNarrowColumn: 90
+  # Pixel width of wide columns in generated published sheets
+    publishedSheetWideColumn: 300
+
+
+aws:
+  s3:
+    bucketName: ${AWS_S3_BUCKETNAME:dev.files.tbbtalent.org}
+    region: us-east-1
+    max-size: 52428800
+    upload-folder: temp
+  credentials:
+    # For dev this should be set in tbb-secrets
+    accessKey: ${AWS_CREDENTIALS_ACCESSKEY:}
+    secretKey: ${AWS_CREDENTIALS_SECRETKEY:}
+
+#email:
+#   type: STUB or SMTP
+#   user - email login user
+#   authenticated - turns on email authentication (mail.smtp.auth)
+#   alertEmail - this is the email that alert messages is sent to
+#   defaultEmail - this is set as the from email on sent emails
+#   testOverrideEmail - if set, all emails will be sent to this email address - no matter what the
+#                       "to" email is.
+
+email:
+  type: ${EMAIL_TYPE:STUB}
+  host: ${EMAIL_HOST:smtp.gmail.com}
+  port: 587
+  user: ${EMAIL_USER:noreply@talentcatalog.net}
+
+  # For dev this could be set in tc-secrets - but only needed if email.type is not STUB, which it
+  # normally will be in dev.
+  password: ${EMAIL_PASSWORD:}
+  authenticated: true
+  alertEmail: alert@talentcatalog.net
+  defaultEmail: ${EMAIL_DEFAULTEMAIL:noreply@talentcatalog.net}
+  testOverrideEmail: ${EMAIL_TESTOVERRIDEEMAIL:}
+
+
+#Support for in context language translation
+translation:
+  password: ${TRANSLATION_PASSWORD:TGFM}
+
+#Identifies the running environment — AWS task definitions hold the corresponding value, e.g. 'prod'/'staging'
+#Options for injecting into code: https://www.baeldung.com/spring-boot-properties-env-variables
+environment: ${ENVIRONMENT:local}

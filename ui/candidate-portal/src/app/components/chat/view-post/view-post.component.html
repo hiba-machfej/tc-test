@@ -1,0 +1,50 @@
+<div class="post" #thisPost>
+  <p class="audit">
+   <strong> {{createdBy}}: </strong>
+    <small>{{post?.createdDate | date: 'customDateTime'}}</small>
+  </p>
+  <p class="content" *ngIf="post?.content" [ngClass]="{'html':isHtml(post.content), 'text':!isHtml(post.content)}" [innerHtml]="post.content"></p>
+
+  <div>
+    <div *ngFor="let linkPreview of post.linkPreviews">
+      <app-preview-link [linkPreview]="linkPreview"
+                        [userIsPostAuthor]="userIsPostAuthor"
+      ></app-preview-link>
+    </div>
+  </div>
+
+  <div class="d-flex flex-row-reverse flex-wrap">
+    <button *ngIf="!readOnly" id="reactionBtn"
+            [ngClass]="!this.reactionPickerVisible ? 'reaction-btn' : 'reaction-btn-selected'"
+            (click)="toggleReactionPicker()">
+      <fa-icon id="reactionBtnSmiley" icon="face-smile" size="xs"></fa-icon>+
+    </button>
+    <button class="modify-reaction-btn"
+            *ngFor="let reaction of post.reactions"
+            (click)="onSelectReaction(reaction)">
+      <span [ngbTooltip]="reactionToolTip">
+        {{reaction.emoji}} {{reaction.users.length}}
+      </span>
+      <ng-template #reactionToolTip>
+        <div id="reactionTooltipEmoji">
+          {{reaction.emoji}}
+        </div>
+        <div *ngFor="let user of reaction.users">
+          {{user.displayName}}
+        </div>
+      </ng-template>
+    </button>
+  </div>
+
+</div>
+
+<emoji-mart
+  id="reactionPicker"
+  *ngIf="reactionPickerVisible"
+  (emojiClick)="onSelectEmoji($event)"
+  emoji="point_up"
+  title="Add emoji..."
+  [autoFocus]="true"
+></emoji-mart>
+
+<div *ngIf="reactionPickerVisible" class="overlay" (click)="toggleReactionPicker()"></div>

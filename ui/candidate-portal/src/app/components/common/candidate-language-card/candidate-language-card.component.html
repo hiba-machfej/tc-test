@@ -1,0 +1,62 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="text-end" *ngIf="!isEnglish(language.languageId) && !preview">
+  <button class="btn btn-danger btn-card" (click)="delete()">&times;</button>
+</div>
+
+<!-- WHICH LANGUAGE -->
+<div class="mb-3" *ngIf="!isEnglish(language.languageId)">
+  <label class="form-label">{{ 'REGISTRATION.LANGUAGE.LABEL.LANGUAGE' | translate }}</label>
+
+  <ng-select [disabled]="" [(ngModel)]="language.languageId" disabled *ngIf="!preview"
+             [items]="languages" [clearable]="false" bindValue="id" bindLabel="name">
+  </ng-select>
+
+  <p class="m-0" *ngIf="preview">
+    {{getLanguageName(language)}}
+  </p>
+</div>
+
+<!-- HOW WELL DO YOU SPEAK -->
+<div class="mb-3">
+  <label class="form-label" translate dir="auto">
+    {{ 'REGISTRATION.LANGUAGE.LABEL.SPEAK' | translate:{languageName: getLanguageName(language)} }}
+  </label>
+
+  <ng-select [(ngModel)]="language.spokenLevelId" *ngIf="!preview" [items]="languageLevels"
+             [clearable]="false" bindLabel="name" bindValue="id">
+  </ng-select>
+
+  <p class="m-0" *ngIf="preview">
+    {{getLangLevel(language.spokenLevel)}}
+  </p>
+</div>
+
+<!-- HOW WELL DO YOU READ AND WRITE -->
+<div class="mb-3">
+  <label class="form-label" translate dir="auto" [translateParams]="{languageName: getLanguageName(language)}">
+    {{ 'REGISTRATION.LANGUAGE.LABEL.WRITTEN' | translate:{languageName: getLanguageName(language)} }}
+  </label>
+
+  <ng-select [(ngModel)]="language.writtenLevelId" *ngIf="!preview" [items]="languageLevels"
+             [clearable]="false" bindValue="id" bindLabel="name">
+  </ng-select>
+
+  <p class="m-0" *ngIf="preview">
+    {{getLangLevel(language.writtenLevel)}}
+  </p>
+</div>

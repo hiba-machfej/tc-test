@@ -1,0 +1,41 @@
+/*!
+ * Copyright (c) 2021 Talent Beyond Boundaries.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
+$white: #ffffff;
+$light:      #f3f0e6;
+$dark:       #151f2d;
+$primary: #1c4679;
+$secondary: #0e7688;
+$info: #9b6a0d;
+$accent1:    #383b48;
+$accent2:    #64656d;
+$accent3:    #b2b7bb;
+$success: #03864d;
+$warning: #b0a007;
+$highlight: #ffff00;
+$danger: #a91206;
+
+// Bootstrap SCSS variable overrides
+// Accordion
+$accordion-button-bg: $accent3;
+$accordion-border-color: $light;
+$accordion-button-active-bg: $accent1;
+$accordion-button-active-color: $light;
+
+// Nav tabs
+$nav-link-padding-x: 0.75rem;
+
+$offcanvas-horizontal-width: 40vw;

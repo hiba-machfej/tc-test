@@ -1,0 +1,65 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="modal-header">
+
+  <h4 class="modal-title">{{title}}</h4>
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="dismiss()"></button>
+
+</div>
+
+<div class="modal-body">
+
+  <div class="alert alert-danger" *ngIf="error">
+    {{error}}
+  </div>
+
+  <form [formGroup]="form">
+    <div class="mb-3">
+      <label class="form-label" for="name">Name *</label>
+      <input class="form-control" id="name" formControlName="name">
+      <div *ngIf="nameControl.invalid && (nameControl.dirty || nameControl.touched)"
+           class="alert alert-danger">
+        <div *ngIf="nameControl.errors.required">
+          Name is required.
+        </div>
+      </div>
+    </div>
+    <!--  Submission lists are meant to be collaborative - no 'Fixed?' option for those  -->
+    <div *ngIf="!isSubmissionList">
+      <div class="form-check mb-3">
+        <label class="form-label" for="fixed">Fixed?</label>
+        <input type="checkbox" formControlName="fixed" id="fixed" class="form-check-input">
+        <button class="tool-tip-button"
+                triggers="click"
+                ngbTooltip="Prevent other users from making changes"
+                placement="right">
+          <i class="fa-regular fa-circle-question fa-xs"></i>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-success" (click)="save()"
+          [disabled]="form?.invalid || saving">
+    <i class="fas fa-spinner fa-spin" *ngIf="saving"></i>
+    Save
+  </button>
+</div>
+
+

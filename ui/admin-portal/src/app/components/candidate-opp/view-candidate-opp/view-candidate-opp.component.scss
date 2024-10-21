@@ -1,0 +1,18 @@
+@import "~src/scss/variables";
+
+.detail-panel {
+  h1 {
+    font-size: 1.5rem;
+  }
+}
+
+.file-link {
+  p, a {
+    font-weight: 500;
+  }
+}
+
+.icon-padding > a {
+  padding-left: 0.5em;
+}
+

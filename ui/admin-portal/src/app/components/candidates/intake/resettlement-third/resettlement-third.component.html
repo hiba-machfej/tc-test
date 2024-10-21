@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+  <div class="mb-3">
+    <label class="form-label" for="resettleThird">Have you ever applied for resettlement or emigration to a 3rd country?</label>
+    <div class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="resettleThird" [formControlName]="'resettleThird'" (clear)="setNoResponse('resettleThird')"
+               [items]="resettlementThirdOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+  </div>
+  <div *ngIf="resettlementThird === 'Yes'">
+    <div class="mb-3">
+      <label class="form-label" for="resettleThirdStatus">
+        If yes, do you know the status of your application? Do you know how far along you are in the process?
+        What is the last piece of correspondence/info you received? </label>
+      <textarea type="text" class="md-textarea-auto form-control" rows="3"
+                id="resettleThirdStatus" [formControlName]="'resettleThirdStatus'"
+                placeholder="" ></textarea>
+    </div>
+  </div>
+</form>
+
+

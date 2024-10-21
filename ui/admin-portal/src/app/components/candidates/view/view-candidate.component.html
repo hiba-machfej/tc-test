@@ -1,0 +1,299 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="loading">
+  <i class="fas fa-spinner fa-spin"></i> loading...
+</div>
+<div class="alert alert-danger" *ngIf="error">
+  {{error}}
+</div>
+<div *ngIf="!loading && !loadingError">
+
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb align-items-center">
+      <li class="breadcrumb-item"><a [routerLink]="['/']">Home</a></li>
+      <li *ngIf="candidate.user.firstName" class="breadcrumb-item active" aria-current="page">{{candidate.user.firstName}}</li>
+      <li *ngIf="!candidate.user.firstName" class="breadcrumb-item active" aria-current="page">{{candidate.candidateNumber}}</li>
+      <li *ngIf="isEditable()" class="ms-auto">
+        <div  class="input-group">
+          <input type="text" class="form-control" id="status" title="{{candidate.candidateMessage}}"
+                 value="{{candidate.status | titlecase}}" disabled>
+          <button class="btn btn-sm btn-secondary" (click)="editCandidate()"><i class="fas fa-edit fa-sm"></i></button>
+        </div>
+      </li>
+    </ol>
+
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center">
+
+      <h1>{{candidate.user.firstName}} {{candidate.user.lastName}}
+        <span class="small text-muted">
+        {{candidate.candidateNumber}}
+          <a target="_blank" [routerLink]="['/candidate',candidate.candidateNumber]" class="link-primary">
+            <i class="fas fa-external-link-alt is-link" title="Show candidate in new tab"></i>
+          </a>
+           -
+          <a target="_blank" (click)="downloadGeneratedCV()" class="link-info">
+              <i class="fas fa-file-download"
+                 title="Opens/DLs CV generated from candidate profile"
+              ></i>
+          </a>
+          <a *ngIf="candidate.sflink && canAccessSalesforce()" [href]="candidate.sflink" target="_blank" class="link-info">
+            <i class="fab fa-salesforce" title="Show candidate in Salesforce"></i>
+          </a>
+          <a *ngIf="candidate.folderlink" [href]="candidate.folderlink" target="_blank" class="link-info">
+            <i class="fab fa-google-drive" title="Show candidate's Google Doc folder"></i>
+          </a>
+          <a *ngIf="candidate.videolink" [href]="candidate.videolink" target="_blank" class="link-info">
+            <i class="fas fa-video" title="Show candidate's one way video"></i>
+          </a>
+          <a *ngIf="candidate.linkedInLink" [href]="candidate.linkedInLink" target="_blank" class="link-info" >
+            <i class="fab fa-linkedin" title="Show candidate's linkedIn"></i>
+          </a>
+          <app-cv-icon
+            *ngIf="isCVViewable()"
+            [candidate]="candidate">
+          </app-cv-icon>
+          <a [href]="publicCvUrl()" target="_blank" class="link-info">
+            <i class="fas fa-users" title="View candidate's public CV"></i>
+          </a>
+          <a (click)="createTailoredCv()" class="link-info">
+            <i class="fas fa-users-gear"  title="View tailored candidate's public CV"></i>
+          </a>
+        </span>
+      </h1>
+
+
+      <div class="col-sm-4">
+        <app-candidate-shareable-notes
+          [candidate]="candidate"
+          [editable] = "isEditable()"
+        >
+        </app-candidate-shareable-notes>
+      </div>
+
+  </div>
+
+  <div class="d-flex align-items-end mb-4">
+    <div class="flex-grow-1">
+      <p class="small text-muted mb-0">Add candidate to a list</p>
+      <ng-select
+        [readonly]="!isEditable()"
+        [items]="lists"
+        [multiple]="true"
+        [placeholder]="'Select or Type'"
+        [closeOnSelect]="false"
+        [clearable]="false"
+        [loading]="savingList"
+        bindLabel="name"
+        [clearSearchOnAdd]="true"
+        [(ngModel)]="selectedLists"
+        (add)="onItemSelect($event)"
+        [compareWith]="compareLists"
+        [hideSelected]="true">
+        <ng-template ng-header-tmp>
+          <span class="text-muted ms-2">Selected: {{selectedLists.length}}</span>
+        </ng-template>
+        <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+          <div class="ng-value" *ngFor="let item of items">
+            <span class="ng-value-label">
+              <a [routerLink]="['/list', item.id]"> {{item.name}} </a>
+              <a target="_blank" [routerLink]="['/list', item.id]">
+                <i class="fas fa-external-link-alt" title="Open list in new tab"></i>
+              </a>
+            </span>
+            <span class="ng-value-icon right" (click)="onItemDeSelect(item)" aria-hidden="true">×</span>
+          </div>
+        </ng-template>
+      </ng-select>
+      <p class="small text-muted mt-1">
+        You can select from lists you created, global lists (like job lists) or lists that you have
+        starred.
+      </p>
+    </div>
+
+    <div *ngIf="isEditable()" class="ps-2 flex-shrink-0">
+      <button class="btn btn-sm btn-primary" type="button"
+              (click)="onNewList()">+ New List
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+      <!-- Just have main panel taking up whole screen if they cannot view private data (case notes)-->
+      <div class="col-sm-{{canViewPrivateInfo() ? mainPanelColWidth : totalPanelWidth}}">
+        <!-- TABS -->
+        <nav ngbNav #nav="ngbNav" class="nav-tabs" [activeId]="activeTabId" (navChange)="onTabChanged($event)">
+
+          <!-- GENERAL -->
+          <ng-container ngbNavItem="General">
+            <a ngbNavLink>General</a>
+            <ng-template ngbNavContent>
+              <app-candidate-general-tab
+                [candidate]="candidate"
+                [editable]="isEditable()"
+                [adminUser]="isAnAdmin()">
+              </app-candidate-general-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- EXPERIENCE -->
+          <ng-container ngbNavItem="Experience">
+            <a ngbNavLink>Experience</a>
+            <ng-template ngbNavContent>
+              <app-candidate-experience-tab
+                [candidate]="candidate"
+                [editable]="isEditable()"
+                [adminUser]="isAnAdmin()">
+              </app-candidate-experience-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- Education -->
+          <ng-container ngbNavItem="Education">
+            <a ngbNavLink>Education</a>
+            <ng-template ngbNavContent>
+              <app-candidate-education-tab
+                [candidate]="candidate"
+                [editable]="isEditable()"
+                [adminUser]="isAnAdmin()">
+              </app-candidate-education-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- Additional Info -->
+          <ng-container ngbNavItem="Additional">
+            <a ngbNavLink>Additional Info</a>
+            <ng-template ngbNavContent>
+              <app-candidate-additional-info-tab
+                [candidate]="candidate"
+                [editable]="isEditable()"
+                [canViewPrivateInfo]="canViewPrivateInfo()">
+              </app-candidate-additional-info-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- Mini Intake -->
+          <ng-container ngbNavItem="MiniIntake" *ngIf="canViewPrivateInfo()">
+            <a ngbNavLink>Mini Intake</a>
+            <ng-template ngbNavContent>
+              <app-candidate-mini-intake-tab
+                [candidate]="candidate">
+              </app-candidate-mini-intake-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- Intake -->
+          <ng-container ngbNavItem="FullIntake" *ngIf="canViewPrivateInfo()">
+            <a ngbNavLink>Full Intake</a>
+            <ng-template ngbNavContent>
+              <app-candidate-intake-tab
+                [candidate]="candidate">
+              </app-candidate-intake-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- Visa eligibility -->
+          <ng-container ngbNavItem="Visa" *ngIf="canViewPrivateInfo()">
+            <a ngbNavLink>Visa</a>
+            <ng-template ngbNavContent>
+              <app-candidate-visa-tab
+                [candidate]="candidate">
+              </app-candidate-visa-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- TASKS -->
+          <ng-container ngbNavItem="Tasks" *ngIf="canViewPrivateInfo()">
+            <a ngbNavLink>Tasks</a>
+            <ng-template ngbNavContent>
+              <app-candidate-task-tab
+                [candidate]="candidate"
+                [editable]="isEditable()">
+              </app-candidate-task-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- JOBS -->
+          <ng-container ngbNavItem="Jobs">
+            <a ngbNavLink>Jobs</a>
+            <ng-template ngbNavContent>
+              <app-candidate-jobs-tab
+                [candidate]="candidate">
+              </app-candidate-jobs-tab>
+            </ng-template>
+          </ng-container>
+
+          <!-- Chat between source partner and candidate, or the option to create one -->
+          <ng-container ngbNavItem="CandidateProspect" *ngIf="candidateProspectTabVisible">
+            <!-- Tab header -->
+            <a ngbNavLink>
+              Chat With Candidate
+              <app-chat-read-status *ngIf="candidateChat" [chats]="[candidateChat]">
+              </app-chat-read-status>
+            </a>
+            <!-- Tab content — either the chats or a button to create one with help text -->
+            <ng-template ngbNavContent>
+              <app-view-chat-posts *ngIf="candidateChat; else createChatButton"
+                                   [readOnly] = "isReadOnlyUser()"
+                                   [chat]="candidateChat">
+              </app-view-chat-posts>
+              <ng-template #createChatButton>
+                <div *ngIf="!isReadOnlyUser()">
+                  <div class="text-center mt-5 mb-4">
+                    <button class="btn btn-secondary mb-1" (click)="createChat()">
+                  <span *ngIf="loadingButton; else elseBlock">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </span>
+                      <ng-template #elseBlock>
+                        <i class="fa-regular fa-comment"></i>
+                      </ng-template>
+                      Create Chat
+                    </button>
+                  </div>
+                  <div class="text-muted fw-light text-center fs-6">
+                    Click the button to create a chat with this candidate.
+                    <br><br>
+                    They will not see the chat until you have posted, at which point the Chat tab
+                    will appear on their candidate portal profile. Candidates are notified via email
+                    when new posts are added.
+                  </div>
+                </div>
+              </ng-template>
+            </ng-template>
+          </ng-container>
+
+        </nav>
+        <div [ngbNavOutlet]="nav" class="mt-2"></div>
+      </div>
+      <div *ngIf="canViewPrivateInfo()" class="col-sm-{{sidePanelColWidth}} admin-panel">
+        <div class="w-100">
+          <div *ngIf="canToggleSizes()" class="float-end">
+            <button class="btn btn-sm btn-outline-secondary" (click)="resizeSidePanel()"><i
+              class="fas fa-arrow-{{sidePanelColWidth == 2 ? 'left' : 'right'}}"></i></button>
+          </div>
+          <app-view-candidate-note
+            [candidate]="candidate"
+            [editable]="isEditable()"
+            [characterLimit]="1000"
+            (onResize)="resizeSidePanel()">
+          </app-view-candidate-note>
+        </div>
+      </div>
+    </div>
+</div>
+

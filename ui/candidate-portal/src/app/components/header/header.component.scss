@@ -1,0 +1,107 @@
+/*!
+ * Copyright (c) 2021 Talent Beyond Boundaries.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
+$navbar-height: 80px;
+
+:host {
+  display: block;
+  width: 100%;
+  height: $navbar-height;
+}
+
+.navbar {
+  width: 100%;
+  min-height: $navbar-height;
+  background-color: #f2f2f2;
+  box-shadow: 1px 1px 1px #dddddd;
+
+  .logo {
+    max-height: calc(#{$navbar-height} - 20px);
+  }
+
+  .navbar-nav {
+    margin: 0 1em;
+  }
+
+  .dropdown-menu {
+    .dropdown-item {
+      text-align: center;
+    }
+    .dropdown-header {
+      text-align: center;
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    .navbar-collapse {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}
+
+.navbar-staging {
+  background-color: #7D0101;
+  height: 80px;
+  #logo {
+    visibility: hidden;
+  }
+  #staging {
+    color: white;
+  }
+}
+
+.navbar-local {
+  background-color: #4f3d77;
+}
+
+.translation-toggle {
+  color: #0eb1e3 !important;
+  cursor: pointer;
+}
+
+body > .dropdown > .dropdown-menu {
+  min-width: 100%;
+  opacity: 0;
+  transition: opacity 150ms ease-in-out;
+  &.fixed {
+    opacity: 1;
+  }
+}
+
+//.dropdown {
+//  .dropdown-menu {
+//    transition: all 0.5s;
+//    overflow: hidden;
+//    transform-origin: top center;
+//    transform: scale(1,0);
+//    display: block;
+//  }
+//  &:hover {
+//    .dropdown-menu {
+//      transform: scale(1);
+//    }
+//  }
+//}
+
+// Mobile
+@media screen and (max-width: 768px) {
+  .mobile-menu-item {
+    text-align: center;
+  }
+
+
+}

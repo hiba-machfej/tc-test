@@ -1,0 +1,60 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="container">
+
+    <div id="upload">
+      <ngb-accordion #a="ngbAccordion" [activeIds]="activeIds">
+        <ngb-panel id="upload-cv">
+          <ng-template ngbPanelTitle>
+            <div class="container">
+              <strong class="link underline">{{ 'REGISTRATION.ATTACHMENTS.CV.NAME' | translate }}</strong>
+              <p class="mb-0 small">{{ 'REGISTRATION.ATTACHMENTS.CV.EXPLANATION' | translate }}</p>
+            </div>
+          </ng-template>
+          <ng-template ngbPanelContent>
+            <app-candidate-attachments
+              [cv]="true">
+            </app-candidate-attachments>
+          </ng-template>
+        </ngb-panel>
+      </ngb-accordion>
+
+      <br>
+
+      <ngb-accordion #b="ngbAccordion">
+        <ngb-panel id="upload-file">
+          <ng-template ngbPanelTitle>
+            <div class="container">
+              <strong class="link underline">{{ 'REGISTRATION.ATTACHMENTS.OTHER.NAME' | translate }}</strong>
+              <p class="mb-0 small">{{ 'REGISTRATION.ATTACHMENTS.OTHER.EXPLANATION' | translate }}</p>
+            </div>
+          </ng-template>
+          <ng-template ngbPanelContent>
+            <app-candidate-attachments
+              [cv]="false">
+            </app-candidate-attachments>
+          </ng-template>
+        </ngb-panel>
+      </ngb-accordion>
+    </div>
+
+</div>
+
+<app-registration-footer [type]="edit ? 'update' : 'submit'"
+                         (backClicked)="edit ? cancel() : back() "
+                         (nextClicked)="edit ? update() : submit()">
+</app-registration-footer>

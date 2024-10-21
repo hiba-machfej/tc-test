@@ -1,0 +1,37 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-md-{{mainPanelColWidth}} admin-panel left-panel">
+
+      <app-jobs
+        [searchBy]="searchBy"
+        [chatsRead$]="chatsRead$"
+        (oppSelection)="onJobSelected($event)"
+      >
+      </app-jobs>
+
+    </div>
+
+    <div class="col-md-{{sidePanelColWidth}} detail-panel side-panel-color">
+      <div class="floating-col">
+        <div class="w-100">
+          <div *ngIf="canToggleSizes()" class="float-end">
+            <button class="btn btn-sm btn-outline-secondary" (click)="resizeSidePanel()"><i
+              class="fas fa-arrow-{{sidePanelIsMax ? 'right' : 'left'}}"></i></button>
+          </div>
+
+          <div *ngIf="selectedJob">
+            <app-view-job
+              *ngIf="selectedJob"
+              [job]="selectedJob"
+              [showBreadcrumb]="false"
+              (jobUpdated)="onJobUpdated($event)"
+            >
+            </app-view-job>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

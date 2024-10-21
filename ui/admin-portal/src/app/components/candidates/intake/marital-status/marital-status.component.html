@@ -1,0 +1,176 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+  <div class="mb-3">
+    <label class="form-label" for="maritalStatus">
+      What is your marital status?
+    </label>
+    <div class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="maritalStatus" [formControlName]="'maritalStatus'" (clear)="setNoResponse('maritalStatus')"
+               [items]="maritalStatusOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+    <p class="small">
+      Note: If you are planning on immigrating with your spouse, his or her professional information is also critical
+      to your application. If you are eligible and decide to move forward with this process,
+      we will also discuss in further detail the process related to family.</p>
+  </div>
+
+  <div *ngIf="hasPartner">
+    <div class="mb-3">
+      <label class="form-label" for="partnerRegistered">
+        Is your partner registered with the Talent Catalog?
+      </label>
+      <ng-select id="partnerRegistered" [formControlName]="'partnerRegistered'" (clear)="setNoResponse('partnerRegistered')"
+                 [items]="partnerRegisteredOptions" [clearOnBackspace]="false"
+                 placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+    </div>
+    <div *ngIf="partnerRegistered === 'Yes'">
+      <div class="mb-3">
+        <label class="form-label">
+          If yes, please select your partner from the dropdown. <small>(Start typing name or number to find)</small>
+        </label>
+        <app-candidate-name-num-search
+          [handleSelect]="'displayOnly'"
+          [displayValue]="partnerCandidate ?
+          partnerCandidate?.candidateNumber + ': ' + partnerCandidate?.user?.firstName + ' ' + partnerCandidate?.user?.lastName
+          : null"
+          (candChange)="updatePartnerCand($event)">
+        </app-candidate-name-num-search>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="partnerEduLevelId">
+        What is your partner’s highest level of education?
+      </label>
+      <ng-select id="partnerEduLevelId" [formControlName]="'partnerEduLevelId'" [items]="educationLevels"
+                 [clearOnBackspace]="false"
+                 placeholder="Select" bindLabel="name" bindValue="id"></ng-select>
+    </div>
+    <div *ngIf="eduLevelSelected">
+      <div class="mb-3">
+        <label class="form-label" for="partnerEduLevelNotes">
+          Additional notes about partner's education level
+        </label>
+        <textarea type="text" class="md-textarea-auto form-control" rows="4"
+                  id="partnerEduLevelNotes" [formControlName]="'partnerEduLevelNotes'"
+                  placeholder="" ></textarea>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="partnerOccupationId">
+        What is your partner’s occupation?
+      </label>
+      <ng-select id="partnerOccupationId" [formControlName]="'partnerOccupationId'" [closeOnSelect]="true"
+                 [items]="occupations" [clearOnBackspace]="false" placeholder="Select" bindLabel="name" bindValue="id">
+      </ng-select>
+    </div>
+    <div>
+      <div class="mb-3">
+        <label class="form-label" for="partnerOccupationNotes">
+          Additional notes about selected occupation, or description of an occupation that does
+          not appear in the above list.
+        </label>
+        <textarea type="text" class="md-textarea-auto form-control" rows="4"
+                  id="partnerOccupationNotes" [formControlName]="'partnerOccupationNotes'"
+                  placeholder="" ></textarea>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="partnerEnglish">
+        Does your partner speak English?
+      </label>
+      <ng-select id="partnerEnglish" [formControlName]="'partnerEnglish'" (clear)="setNoResponse('partnerEnglish')"
+                 [items]="partnerEnglishOptions" [clearOnBackspace]="false"
+                 placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+    </div>
+    <div *ngIf="partnerEnglish === 'Yes'">
+      <div class="mb-3">
+        <label class="form-label" for="partnerEnglishLevelId">
+          What level of English does your partner speak?
+        </label>
+        <ng-select id="partnerEnglishLevelId" [formControlName]="'partnerEnglishLevelId'" (clear)="setNoResponse('partnerEnglishLevelId')"
+                   [items]="languageLevels" [clearOnBackspace]="false"
+                   placeholder="Select" bindLabel="name" bindValue="id"></ng-select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="partnerIelts">
+          Has your partner completed IELTS?
+        </label>
+        <ng-select id="partnerIelts" [formControlName]="'partnerIelts'" (clear)="setNoResponse('partnerIelts')"
+                   [items]="partnerIeltsOptions" [clearOnBackspace]="false"
+                   placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+      </div>
+      <div *ngIf="takenIelts">
+        <div class="mb-3">
+          <label class="form-label" for="partnerIeltsScore">
+            What was your partner's score?
+          </label>
+          <app-ielts-score-validation
+            id="partnerIeltsScore"
+            [control]="form.controls.partnerIeltsScore">
+          </app-ielts-score-validation>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="partnerIeltsYr">
+            In what year did your partner take the test?
+          </label>
+          <ng-select id="partnerIeltsYr" [formControlName]="'partnerIeltsYr'" [items]="years" [closeOnSelect]="true"
+                     [clearOnBackspace]="false" placeholder="Select"></ng-select>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="partnerCitizenship">
+        List any country for which your partner has citizenship
+      </label>
+      <ng-select
+        id="partnerCitizenship"
+        [items]="nationalities"
+        [multiple]="true"
+        [closeOnSelect]="true"
+        [searchable]="true"
+        placeholder="Select or type..."
+        bindLabel="name"
+        bindValue="id"
+        formControlName="partnerCitizenship">
+      </ng-select>
+    </div>
+
+  </div>
+
+  <div *ngIf="hasNotes">
+    <div class="mb-3">
+      <label class="form-label" for="maritalStatusNotes">
+        Additional notes about marital status
+      </label>
+      <textarea type="text" class="md-textarea-auto form-control" rows="4"
+                id="maritalStatusNotes" [formControlName]="'maritalStatusNotes'"
+                placeholder="" ></textarea>
+    </div>
+  </div>
+
+</form>
+

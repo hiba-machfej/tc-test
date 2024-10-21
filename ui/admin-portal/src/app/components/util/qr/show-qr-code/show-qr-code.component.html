@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="modal-header">
+  <h4 class="modal-title">Set up Authentication</h4>
+</div>
+<div class="modal-body">
+  <p class="mb-0">
+    Scan this QR code with your phone's authenticator app (for example, Google Authenticator
+    for <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en"
+           target="_blank">Android</a>
+    or <a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
+          target="_blank">Apple</a>).
+  </p>
+  <div class="text-center">
+    <img [src]="qr.base64Encoding"/>
+  </div>
+  <div class="modal-footer">
+    <div class="mb-3 d-flex align-items-baseline">
+      <input type="checkbox" id="confirm" [ngModel]="checked" (change)="checked = !checked">
+      <label for="confirm" class="form-check-label ms-3 mb-0">I have scanned the QR code with an authenticator app.</label>
+    </div>
+    <p class="small text-muted mb-3">
+      Note: If you don't do this you won't be able to login again.
+      If you have any problems, ask a Talent Catalog admin to reset your authentication.
+    </p>
+    <hr/>
+    <button type="button" class="btn btn-primary" (click)="closeModal()" [disabled]="!checked">
+      Confirm
+    </button>
+  </div>
+</div>

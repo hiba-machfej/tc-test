@@ -1,0 +1,104 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="container-fluid step-header" [hidden]="registrationService?.currentStep?.hideHeader">
+
+  <div class="container">
+
+    <h5 *ngIf="registrationService?.currentStep?.section > 0">
+      {{ 'REGISTRATION.HEADER.STEP' | translate: {current: registrationService?.currentStep?.section, total: registrationService?.totalSections} }}
+    </h5>
+
+    <h3 class="fw-bold">{{ 'REGISTRATION.HEADER.TITLE.' + registrationService?.currentStep?.key | uppercase | translate }}</h3>
+
+    <p *ngIf="registrationService?.currentStep?.section > 0" class="explain">
+      {{ 'REGISTRATION.HEADER.EXPLANATION' | translate }}
+    </p>
+
+    <p *ngIf="registrationService?.currentStep?.section === 0" class="explain">
+      {{ 'REGISTRATION.HEADER.ACCOUNT.EXPLANATION' | translate }}
+    </p>
+
+  </div>
+
+  <div class="step-progress">
+    <div class="step-progress-bar" *ngFor="let x of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; let i = index;"
+         [class.selected]="registrationService?.currentStep?.section === i + 1"></div>
+  </div>
+
+
+</div>
+
+<div class="step-body" [ngSwitch]="registrationService?.currentStepKey">
+
+  <app-registration-create-account *ngSwitchCase="'account'">
+  </app-registration-create-account>
+
+  <app-registration-contact *ngSwitchCase="'contact'">
+  </app-registration-contact>
+
+  <app-registration-personal *ngSwitchCase="'personal'"
+                             (onPartnerAssignment)="setPartnerName()">
+  </app-registration-personal>
+
+  <app-registration-candidate-occupation *ngSwitchCase="'occupation'">
+  </app-registration-candidate-occupation>
+
+  <app-registration-work-experience *ngSwitchCase="'experience'">
+  </app-registration-work-experience>
+  <app-registration-education *ngSwitchCase="'education'">
+  </app-registration-education>
+  <app-registration-language *ngSwitchCase="'language'">
+  </app-registration-language>
+  <app-registration-candidate-exam  *ngSwitchCase="'exam'"></app-registration-candidate-exam>
+
+  <app-registration-certifications *ngSwitchCase="'certifications'">
+  </app-registration-certifications>
+
+  <app-registration-destinations *ngSwitchCase="'destinations'">
+  </app-registration-destinations>
+
+  <app-registration-additional-info *ngSwitchCase="'additional'">
+  </app-registration-additional-info>
+
+  <app-registration-upload-file *ngSwitchCase="'upload'">
+  </app-registration-upload-file>
+
+  <div class="container text-center" *ngSwitchCase="'complete'">
+
+    <h1>{{ 'REGISTRATION.COMPLETE.TITLE' | translate}}</h1>
+
+    <p>{{ 'REGISTRATION.COMPLETE.PARA1' | translate:{partner: getPartnerName()} }}</p>
+
+    <div class="text-center my-4">
+      <a class="btn btn-primary" [routerLink]="'/profile'">
+        {{ 'REGISTRATION.COMPLETE.BUTTON.PROFILE' | translate}}
+      </a>
+    </div>
+
+    <div class="text-center my-4">
+      <app-download-cv></app-download-cv>
+    </div>
+
+    <div class="text-center">
+      <button class="btn btn-outline-primary" (click)="logout()">
+        {{ 'REGISTRATION.COMPLETE.BUTTON.LOGOUT' | translate}}
+      </button>
+    </div>
+
+  </div>
+
+</div>

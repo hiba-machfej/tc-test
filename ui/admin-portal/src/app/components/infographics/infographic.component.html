@@ -1,0 +1,137 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a [routerLink]="['/']">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">
+      Stats
+    </li>
+  </ol>
+</nav>
+
+<div class="alert alert-danger" *ngIf="error">
+  {{error}}
+</div>
+
+<form [formGroup]="statsFilter">
+  <div class="container-fluid">
+
+    <div class="row gy-4">
+
+      <div class="col-12 col-lg-3">
+        <label class="form-label">List</label>
+        <!-- Disabled if saved search is entered -->
+        <ng-select
+          id="savedList"
+          [items]="lists"
+          [closeOnSelect]="false"
+          [searchable]="true"
+          placeholder="Select or type..."
+          bindLabel="name"
+          [readonly]="savedSearch != null || this.listFromUrl == true"
+          formControlName="savedList">
+        </ng-select>
+      </div>
+      <div class="col-12 col-lg-3">
+        <label class="form-label">Search</label>
+        <!-- Disabled if saved list is entered -->
+        <ng-select
+          id="savedSearch"
+          [items]="searches"
+          [closeOnSelect]="false"
+          [searchable]="true"
+          placeholder="Select or type..."
+          bindLabel="name"
+          [readonly]="savedList != null  || this.listFromUrl == true"
+          formControlName="savedSearch">
+        </ng-select>
+      </div>
+      <div class="col-12 col-lg-3">
+        <label class="form-label" for="dateFrom">Date From:</label>
+        <app-date-picker id="dateFrom" [control]="statsFilter.controls.dateFrom" [allowFuture]="false"></app-date-picker>
+      </div>
+      <div class="col-12 col-lg-3">
+          <label class="form-label" for="dateTo">Date To:</label>
+          <app-date-picker id="dateTo" [control]="statsFilter.controls.dateTo" [allowFuture]="false"></app-date-picker>
+      </div>
+    </div>
+
+    <div class="row my-4">
+      <div class="col">
+        <button class="btn btn-success float-end" (click)="submitStatsRequest(true)">
+          <i class="fas fa-calendar-alt"></i> Old Run stats
+        </button>
+      </div>
+      <div class="col">
+        <button class="btn btn-success float-end" (click)="submitStatsRequest(false)">
+          <i class="fas fa-calendar-alt"></i> Run stats
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<ng-container *ngIf="loading">
+  <i class="fas fa-spinner fa-spin"></i>
+</ng-container>
+
+<ng-container *ngIf="!loading">
+  <!--Loop through reports data, displaying each report-->
+  <div *ngIf="statReports">
+
+    <nav class="navbar sticky-top navbar-expand-md second-nav">
+      <span class="navbar-brand">Stats for {{statsName}}</span>
+        <ul class="navbar-nav ms-auto">
+          <div ngbDropdown display="dynamic" placement="bottom-end">
+            <button type="button" class="btn btn-info float-end" id="jumpToStats" ngbDropdownToggle>Go to stat <i class="fa-solid fa-hand-point-down"></i></button>
+            <div ngbDropdownMenu aria-labelledby="jumpToStats" class="scroll-dropdown">
+              <ng-container *ngFor="let statReport of statReports; let i = index">
+                <a ngbDropdownItem (click)="scroll(i)">{{statReport.name}}</a>
+              </ng-container>
+            </div>
+          </div>
+
+          <button class="btn btn-secondary float-end  ms-2" [disabled]="!dataLoaded" (click)="exportStats()">
+            Export <i class="fas fa-file-excel"></i>
+          </button>
+
+        </ul>
+    </nav>
+
+    <ng-container *ngFor="let statReport of statReports; let i = index">
+      <div [id]="i">
+        <div class="row ">
+          <div class="col-sm-4">
+            <div class="section">
+              <h6 class="mb-3">{{statReport.name}}</h6>
+              <app-chart *ngIf="statReport.rows.length <= 15 || statReport.chartType == 'bar'"
+                         [chartData]="statReport.rows" [chartType]="statReport.chartType"
+                         [chartLegend]="statReport.chartType != 'bar'"
+              ></app-chart>
+              <p *ngIf="statReport.rows.length > 15 && statReport.chartType != 'bar'">
+                {{statReport.rows.length}} different values.
+                Too many to display here. See the exported data for details.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</ng-container>
+
+

@@ -1,0 +1,35 @@
+<section [formGroup]="form">
+  <div class="section-heading">
+    <h5>{{ 'TASKS.QUESTION.HEADER' | translate }}</h5>
+  </div>
+  <div class="card">
+    <div *ngIf="selectedTask.completedDate != null || selectedTask.abandonedDate != null; else editable">
+      <div>
+        <p class="mb-0">{{selectedTask.answer}}</p>
+      </div>
+    </div>
+
+    <ng-template #editable>
+      <div *ngIf="selectedTask.task?.allowedAnswers?.length > 0; else textBox">
+        <div class="mb-3">
+          <label class="fw-bold form-label" for="responseDropdown">
+            {{ selectedTask.task.description }}
+          </label>
+          <ng-select  id="responseDropdown" [formControlName]="'response'" [clearable]="false" [items]="selectedTask.task.allowedAnswers"
+                      bindLabel="displayName" bindValue="name" placeholder="Select...">
+          </ng-select>
+        </div>
+      </div>
+      <ng-template #textBox>
+        <div class="mb-3">
+          <label class="fw-bold form-label" for="responseAnswer">
+            {{ selectedTask.task.description }}
+          </label>
+          <textarea id="responseAnswer" class="md-textarea-auto form-control" rows="5"
+                    [formControlName]="'response'"></textarea>
+        </div>
+      </ng-template>
+    </ng-template>
+
+    </div>
+</section>

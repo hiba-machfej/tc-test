@@ -1,0 +1,92 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="loading">
+  <i class="fas fa-spinner fa-spin"></i> loading...
+</div>
+<div class="alert alert-danger" *ngIf="error">
+  {{error}}
+</div>
+
+<div *ngIf="!loading" id="VisaIntakes">
+  <div class="row">
+    <div class="col">
+      <h5 class="mb-2">Visa Eligibility Checks</h5>
+    </div>
+    <div class="col">
+      <button type="button" class="btn btn-primary btn-sm float-end" (click)="addRecord()">
+        <i class="fas fa-plus"></i> Add Country
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col pt-3">
+      <app-export-pdf *ngIf="visaChecks?.length > 0" [candidate]="candidate" [idToExport]="'VisaCheck'"></app-export-pdf>
+    </div>
+    <div class="mx-auto col-10 col-md-8 col-lg-6">
+      <form [formGroup]="form">
+        <div *ngFor="let visaCheck of visaChecks; let i = index;">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" [value]="i" name="visaCountry" [id]="'radio'+i"
+                   [formControlName]="'visaCountry'" (change)="reloadAndSelectVisaCheck(i)">
+            <label class="form-check-label fw-light" [for]="'radio'+i">{{visaCheck?.country?.name}}</label>
+            <a *ngIf="canDeleteVisa()" class="link-danger float-end" (click)="deleteRecord(i)"><i class="fas fa-trash"></i></a>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col">
+    </div>
+  </div>
+  <div *ngIf="visaChecks?.length == 0">
+    <p class="small text-muted text-center fw-light">No visa checks added - add a country to begin</p>
+  </div>
+</div>
+
+<hr *ngIf="visaChecks?.length > 0">
+
+<div [ngSwitch]="selectedCountry" *ngIf="selectedVisaCheck != undefined && !loading" id="VisaCheck">
+  <app-visa-check-au *ngSwitchCase="'Australia'"
+                     [candidate]="candidate"
+                     [visaCheckRecord]="selectedVisaCheck"
+                     [candidateIntakeData]="candidateIntakeData">
+  </app-visa-check-au>
+
+  <app-visa-check-ca *ngSwitchCase="'Canada'"
+                     [candidate]="candidate"
+                     [visaCheckRecord]="selectedVisaCheck"
+                     [candidateIntakeData]="candidateIntakeData">
+  </app-visa-check-ca>
+
+  <app-visa-check-nz *ngSwitchCase="'New Zealand'"
+                     [candidate]="candidate"
+                     [candidateIntakeData]="candidateIntakeData">
+  </app-visa-check-nz>
+
+  <app-visa-check-uk *ngSwitchCase="'United Kingdom'"
+                     [candidate]="candidate"
+                     [visaCheckRecord]="selectedVisaCheck"
+                     [candidateIntakeData]="candidateIntakeData">
+  </app-visa-check-uk>
+
+  <div *ngSwitchDefault>
+    //todo error!
+    {{selectedCountry}}
+  </div>
+</div>
+
+

@@ -1,0 +1,80 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+  <div class="mb-3">
+    <label class="form-label" for="interested">Are you interested in international employment opportunities?</label>
+    <ng-select id="interested" [formControlName]="'interested'" (clear)="setNoResponse('interested')"
+               [items]="interestedOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+  </div>
+  <div *ngIf="interested === 'No'">
+    <div class="mb-3" [innerHTML]="'STAFF_INSTRUCTION.CANDIDATE_NO_INTEREST' | translate">
+    </div>
+  </div>
+
+  <div *ngIf="interested === 'Unsure'">
+    <div class="mb-3" [innerHTML]="'STAFF_INSTRUCTION.CANDIDATE_UNSURE_INTEREST' | translate">
+    </div>
+  </div>
+
+  <div *ngIf="interested === 'Yes'">
+    <div class="mb-3">
+      <label class="form-label" for="availImmediate">Are you available for international employment opportunities now?</label>
+      <div class="float-end">
+        <app-autosave-status
+          [saving]="saving"
+          [typing]="typing">
+        </app-autosave-status>
+      </div>
+      <ng-select id="availImmediate" [formControlName]="'availImmediate'" (clear)="setNoResponse('availImmediate')"
+                 [items]="availImmediateOptions" [clearOnBackspace]="false"
+                 placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+    </div>
+
+    <div *ngIf="availImmediateJobOps">
+      <div class="mb-3">
+        <label class="form-label" for="availImmediateJobOps">What type of opportunities are you qualified for?</label>
+        <textarea type="text" class="md-textarea-auto form-control" rows="4"
+                  id="availImmediateJobOps" [formControlName]="'availImmediateJobOps'"
+                  placeholder="" readonly></textarea>
+      </div>
+    </div>
+
+    <div *ngIf="availImmediate === 'No'|| availImmediate == 'Unsure'">
+      <div>
+        <label class="form-label" for="availDate">When will you be available?</label>
+        <app-date-picker id="availDate" [control]="form.controls.availDate"></app-date-picker>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="availImmediateReason">Factors preventing immediate availability for international work.</label>
+        <ng-select id="availImmediateReason" [formControlName]="'availImmediateReason'" (clear)="setNoResponse('availImmediateReason')"
+                   [items]="availImmediateReasonOptions" [clearOnBackspace]="false"
+                   placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="availImmediateNotes">If Other, or if you have additional notes please describe here.</label>
+        <textarea type="text" class="md-textarea-auto form-control" rows="4"
+                  id="availImmediateNotes" [formControlName]="'availImmediateNotes'"
+                  placeholder="" ></textarea>
+      </div>
+    </div>
+  </div>
+</form>
+

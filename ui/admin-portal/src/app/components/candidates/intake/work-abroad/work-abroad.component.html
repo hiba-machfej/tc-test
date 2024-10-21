@@ -1,0 +1,44 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+  <div class="mb-3">
+    <label class="form-label" for="workAbroad">
+      Have you studied, lived, or worked abroad for more than 90 days?
+    </label>
+    <div class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="workAbroad" [formControlName]="'workAbroad'" (clear)="setNoResponse('workAbroad')"
+               [items]="workAbroadOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+  </div>
+  <div *ngIf="workAbroad === 'Yes'">
+    <div class="mb-3">
+      <label class="form-label" for="workAbroadNotes">Please list each country and explain the purpose of work/stay, how many years there and any additional information.</label>
+      <textarea type="text" class="md-textarea-auto form-control" rows="4"
+                id="workAbroadNotes" [formControlName]="'workAbroadNotes'"
+                placeholder="" ></textarea>
+    </div>
+  </div>
+</form>
+

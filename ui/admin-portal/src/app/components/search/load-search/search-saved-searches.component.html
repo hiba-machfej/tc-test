@@ -1,0 +1,91 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="modal-header">
+
+  <h4 class="modal-title">Load Searches</h4>
+
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="dismiss()"></button>
+
+</div>
+<div class="modal-body">
+  <div class="section">
+    <div class="alert alert-danger" *ngIf="error">
+      {{error}}
+    </div>
+    <form [formGroup]="searchForm" (ngSubmit)="search()">
+
+      <div class="row">
+
+        <div class="mb-3 col-4">
+          <input type="text" class="form-control" placeholder="Search..." aria-label="Search" formControlName="keyword"
+                 id="keyword">
+        </div>
+     </div>
+    </form>
+  </div>
+
+  <div class="text-muted mb-2 align-middle">
+
+    <ngb-pagination class="float-end"
+                    [boundaryLinks]="true"
+                    [pageSize]="pageSize"
+                    [collectionSize]="results?.totalElements"
+                    [(page)]="pageNumber"
+                    [maxSize]="5"
+                    [ellipses]="true"
+                    [rotate]="true"
+                    (pageChange)="search()">
+    </ngb-pagination>
+
+    Found {{results?.totalElements}} saved searches
+  </div>
+
+  <table class="table">
+
+
+    <tbody>
+    <tr *ngFor="let savedSearch of results?.content">
+      <td><app-candidate-source [candidateSource]="savedSearch"
+                                [seeMore]="false" [showWatch]="false"
+                                [showOpen]="false" [showSelect]="true"
+                                (selectSource)="selectSearch($event)"
+                            >
+
+      </app-candidate-source></td>
+    </tr>
+
+    <!-- loading -->
+    <tr *ngIf="loading">
+      <td colspan="42">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+      </td>
+    </tr>
+
+    <!-- no results -->
+    <tr *ngIf="!loading && !results?.totalElements">
+      <td colspan="42">
+        <span class="text-muted">(no matching searches)</span>
+      </td>
+    </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
+
+

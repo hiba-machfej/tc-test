@@ -1,0 +1,106 @@
+<div class="container">
+
+  <app-error [error]="error"></app-error>
+
+  <app-loading [loading]="loading"></app-loading>
+
+  <ng-container *ngIf="!loading && selectedTask">
+    <app-candidate-task
+      [selectedTask]="selectedTask"
+      [candidate]="candidate"
+      (back)="unSelectTask()">
+    </app-candidate-task>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && !selectedTask">
+    <div>
+      <div class="d-flex justify-content-between align-items-baseline mb-4">
+        <div>
+          <h3>{{ 'TASKS.ONGOING.HEADER' | translate }}</h3>
+          <p class="text-muted">{{ 'TASKS.ONGOING.NOTE' | translate }}</p>
+        </div>
+        <div class="flex-shrink-0">
+          <a class="btn btn-sm btn-primary" target="_blank" href="https://www.talentbeyondboundaries.org/talentcatalog/tasks/overview">
+            {{ 'TASKS.VIEWHELP' | translate }} <fa-icon class="ms-1" icon="question-circle"></fa-icon>
+          </a>
+        </div>
+      </div>
+      <div class="table-responsive-sm">
+        <table class="table table-hover bg-white">
+          <thead class="table-light">
+          <tr>
+            <th>{{ 'TASKS.TABLE.NAME' | translate }}</th>
+            <th class="text-center w-15">{{ 'TASKS.TABLE.REQUIRED' | translate }}</th>
+            <th class="text-center w-15">{{ 'TASKS.TABLE.DUEDATE' | translate }}</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let ta of ongoingTasks" (click)="selectTask(ta)">
+            <td>
+              <div class="link underline">{{ta.task.displayName}}</div>
+            </td>
+            <td class="text-center">
+              <fa-icon *ngIf="!ta.task.optional" icon="check" size="xs"></fa-icon>
+              <fa-icon *ngIf="ta.task.optional" icon="times" size="xs"></fa-icon>
+            </td>
+            <td class="fw-light date-size text-center" [ngClass]="{'text-danger fw-bolder': isOverdue(ta)}">{{ta.dueDate | date}}</td>
+          </tr>
+          <!-- loading -->
+          <tr *ngIf="loading">
+            <td colspan="42">
+              <i class="fas fa-spinner fa-spin"></i> {{ 'LOADING' | translate }}
+            </td>
+          </tr>
+          <!-- no results -->
+          <tr *ngIf="!loading && !ongoingTasks?.length">
+            <td colspan="42" class="text-center">
+              <span class="text-muted">({{ 'TASKS.TABLE.NONE.ACTIVETASKS' | translate }})</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div>
+      <div class="mb-4">
+        <h3>{{ 'TASKS.COMPLETED.HEADER' | translate }}</h3>
+        <p class="text-muted">{{ 'TASKS.COMPLETED.NOTE' | translate }}</p>
+      </div>
+      <div class="table-responsive-sm">
+        <table class="table table-hover bg-white">
+          <thead class="table-light">
+          <tr>
+            <th>{{ 'TASKS.TABLE.NAME' | translate }}</th>
+            <th class="text-center w-15">{{ 'TASKS.TABLE.COMPLETED' | translate }}</th>
+            <th class="text-center w-15">{{ 'TASKS.TABLE.ABANDONED' | translate }}</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let ta of completedOrAbandonedTasks" (click)="selectTask(ta)">
+            <td><div>{{ta.task.displayName}}</div></td>
+            <td class="text-center date-size">{{ta.completedDate | date}}</td>
+            <td class="text-center date-size">{{ta.abandonedDate | date}}</td>
+          </tr>
+          <!-- loading -->
+          <tr *ngIf="loading">
+            <td colspan="42">
+              <i class="fas fa-spinner fa-spin"></i> {{ 'LOADING' | translate }}
+            </td>
+          </tr>
+          <!-- no results -->
+          <tr *ngIf="!loading && !completedOrAbandonedTasks?.length">
+            <td colspan="42" class="text-center">
+              <span class="text-muted">({{ 'TASKS.TABLE.NONE.COMPLETEDTASKS' | translate }})</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</div>

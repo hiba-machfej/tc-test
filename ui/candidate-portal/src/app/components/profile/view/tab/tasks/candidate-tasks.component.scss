@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  padding: 20px 0;
+}
+
+
+@media screen and (max-width: 480px) {
+  thead {
+    font-size: 0.85rem;
+  }
+  tbody{
+    font-size: 0.85rem;
+  }
+
+  .date-size {
+    font-size: 0.75rem;
+  }
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.w-15 {
+  width: 15%;
+}

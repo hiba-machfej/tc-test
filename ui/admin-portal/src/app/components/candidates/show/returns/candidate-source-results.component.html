@@ -1,0 +1,143 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="candidateSource && showSourceDetails">
+  <app-candidate-source
+          [candidateSource]="candidateSource" [seeMore]="false" [showMore]="true"
+          [showOpen]="true" [showDelete]="true" [showEdit]="true" [showCopy]="true"
+          [showRunStats]="true" [showStarred]="true"
+          (openSource)="onOpenSource()"
+          (toggleStarred)="onToggleStarred($event)"
+          (toggleWatch)="onToggleWatch($event)"
+          (deleteSource)="onDeleteSource($event)"
+          (editSource)="onEditSource($event)"
+          (copySource)="onCopySource($event)"
+          (selectColumns)="onSelectColumns()"
+  >
+  </app-candidate-source>
+</div>
+<div *ngIf="error">
+  Error: {{error}}
+</div>
+
+<div class="text-muted my-2 align-middle" *ngIf="!searching">
+  <ngb-pagination
+    [boundaryLinks]="true"
+    [pageSize]="pageSize"
+    [collectionSize]="results?.totalElements"
+    [(page)]="pageNumber"
+    (pageChange)="onPageChange()"
+    [maxSize]="5"
+    [ellipses]="true"
+    [rotate]="true"
+  >
+  </ngb-pagination>
+</div>
+
+<div *ngIf="results">
+  <div *ngIf="timestamp">
+    <button class="btn" *ngIf="timestamp" (click)="onRefreshRequest()"><i class="fas fa-sync" title="Refresh data"></i></button>
+    {{results.totalElements}} results. Timestamp {{timestamp | date: 'customDateTime'}}
+  </div>
+
+  <!-- loading -->
+  <div *ngIf="searching">
+      <i class="fas fa-spinner fa-spin"></i> Loading...
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+
+      <thead class="table-primary">
+      <tr>
+        <th class="candidate-number-row" (click)="toggleSort('id')">
+          <app-sorted-by [column]="'id'" [sortColumn]="sortField" [sortDirection]="sortDirection"></app-sorted-by>
+          #
+        </th>
+        <th *ngFor="let field of selectedFields" (click)="toggleSort(field.fieldPath)">
+          <app-sorted-by [column]="field.fieldPath" [sortColumn]="sortField"
+                         [sortDirection]="sortDirection"></app-sorted-by>
+          {{field.displayName}}
+        </th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <tr *ngFor="let candidate of results?.content">
+        <td>
+          <a class="fw-bold" [routerLink]="['/candidate',candidate.candidateNumber]">
+            {{candidate.candidateNumber}}
+          </a>
+          <a target="_blank" [routerLink]="['/candidate',candidate.candidateNumber]">
+            <i class="fas fa-external-link-alt is-link me-2" title="Show candidate in new tab"></i>
+          </a>
+          <a [routerLink]="['/candidate',candidate.candidateNumber]">
+            <i class="fas fa-user" title="Candidate"></i>
+          </a>
+          <a *ngIf="isShowStage()" [routerLink]="getCandidateOpportunityLink(candidate)">
+            <i class="fas fa-address-book" title="Case (candidate opportunity)"></i>
+          </a>
+          <span *ngIf="showSourceDetails">
+            <a target="_blank" [href]="candidate.user.partner.websiteUrl">
+              <i class="fas fa-hands-helping" [title]="'Partner: ' + candidate.user.partner.name"></i>
+            </a>
+            <a *ngIf="candidate.sflink && canAccessSalesforce()" [href]="candidate.sflink" target="_blank">
+              <i class="fab fa-salesforce" title="Show candidate in Salesforce"></i>
+            </a>
+            <a *ngIf="candidate.folderlink" [href]="candidate.folderlink" target="_blank">
+              <i class="fab fa-google-drive" title="Show candidate's Google Doc folder"></i>
+            </a>
+            <a *ngIf="candidate.videolink" [href]="candidate.videolink" target="_blank">
+              <i class="fas fa-video" title="Show candidate's one way video"></i>
+            </a>
+            <a *ngIf="candidate.linkedInLink" [href]="candidate.linkedInLink" target="_blank">
+              <i class="fab fa-linkedin" title="Show candidate's LinkedIn page"></i>
+            </a>
+            <app-cv-icon
+              *ngIf="isCandidateNameViewable()"
+              [candidate]="candidate">
+            </app-cv-icon>
+          </span>
+        </td>
+
+        <td *ngFor="let field of selectedFields">
+          <span>
+            {{field.getValue(candidate)}}
+          </span>
+        </td>
+      </tr>
+
+      <!-- no results -->
+      <tr *ngIf="!searching && !results?.totalElements">
+        <td colspan="42">
+          <span class="text-muted">(no matching candidates)</span>
+        </td>
+      </tr>
+
+      </tbody>
+
+    </table>
+  </div>
+
+</div>
+<div *ngIf="!results && !searching">
+  No results
+</div>
+<!-- loading -->
+<div *ngIf="searching">
+  <i class="fas fa-spinner fa-spin"></i> Loading...
+</div>

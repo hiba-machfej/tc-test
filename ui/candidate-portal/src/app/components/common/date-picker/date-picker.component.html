@@ -1,0 +1,21 @@
+<div class="input-group">
+  <input class="form-control readonly-white" placeholder="yyyy-mm-dd"
+         name="dp" ngbDatepicker container="body"
+         #picker="ngbDatepicker"
+         [(ngModel)]="date"
+         (ngModelChange)="update()"
+         (dateSelect)="control.markAsDirty()"
+         [autoClose]="true"
+         [outsideDays]="'hidden'"
+         [minDate]="minDate"
+         [maxDate]="maxDate"
+         (click)="picker.toggle()"
+         [readOnly]="true">
+  <small class="btn btn-link text-secondary" (click)="clear()">
+    <span>{{ 'FORM.LABEL.CLEAR' | translate }}</span>
+  </small>
+
+  <div class="btn btn-link" (click)="picker.toggle()">
+    <span>{{ 'FORM.LABEL.CHOOSE' | translate}}</span>
+  </div>
+</div>

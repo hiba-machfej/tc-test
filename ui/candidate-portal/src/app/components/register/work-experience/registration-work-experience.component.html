@@ -1,0 +1,85 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="container">
+
+  <app-loading [loading]="loading"></app-loading>
+
+  <!-- REVIEW -->
+  <ng-container *ngIf="!experienceFormOpen">
+    <ng-container *ngFor="let occupation of occupations">
+
+      <div class="card occupation-card">
+        <div class="card occupation-heading">
+          <h5>{{occupation.occupation.name | translate }}
+            <span *ngIf="occupation.occupation.id == 0 && occupation.migrationOccupation"> : {{occupation.migrationOccupation}}</span>
+          </h5>
+          <p class="text-danger warning-width mb-0" *ngIf="occupation.occupation.id === 0">
+            {{ 'ERROR.UNKNOWN_OCCUPATION' | translate }}
+          </p>
+          <button class="btn btn-outline-primary d-none d-md-block"
+                  (click)="addExperience(occupation)">
+            {{ 'REGISTRATION.EXPERIENCE.BUTTON.ADD' | translate }} *
+          </button>
+        </div>
+
+        <div class="card alert alert-danger" *ngIf="experiencesByCandidateOccupation[occupation.id]?.length===0">
+          {{ 'ERROR.MISSING_WORK_EXPERIENCE' | translate }}
+        </div>
+        <ng-container *ngFor="let experience of experiencesByCandidateOccupation[occupation.id]; let i = index;">
+          <div class="card">
+            <app-candidate-job-experience-card [experience]="experience"
+                                               [countries]="countries"
+                                                (onDelete)="handleDelete($event)"
+                                                (onEdit)="handleEdit($event)">
+            </app-candidate-job-experience-card>
+          </div>
+
+          <hr class="mx-4" *ngIf="i < experiencesByCandidateOccupation[occupation.id]?.length - 1">
+        </ng-container>
+
+        <div class="text-center my-4 d-md-none">
+          <button class="btn btn-outline-primary"
+                  (click)="addExperience(occupation)">
+            {{ 'REGISTRATION.EXPERIENCE.BUTTON.ADD' | translate }} *
+          </button>
+        </div>
+
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+  <!-- ADD NEW WORK EXPERIENCE -->
+  <div class="occupation-form" *ngIf="experienceFormOpen">
+    <div class="container">
+      <app-candidate-job-experience-form [countries]="countries"
+                                          [candidateOccupation]="occupation"
+                                          [candidateOccupations]="occupations"
+                                          [candidateJobExperience]="experience"
+                                          (formSaved)="handleSave($event)"
+                                          (formClosed)="handleCancelled($event)">
+      </app-candidate-job-experience-form>
+    </div>
+  </div>
+
+</div>
+
+<app-registration-footer [nextDisabled]="loading || saving || !completedJobExperiences()"
+                         [type]="edit ? 'update' : 'step'"
+                         (backClicked)="edit ? closeEdit() : back() "
+                         (nextClicked)="edit? closeEdit() : next()">
+</app-registration-footer>

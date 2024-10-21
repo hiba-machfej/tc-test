@@ -1,0 +1,135 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div>
+  <div class="section">
+    <div class="float-end">
+      <div class="float-end">
+        <button *ngIf="isAnAdmin() && !loggedInUser.readOnly" class="btn btn-primary" (click)="addUser()">Add</button>
+      </div>
+    </div>
+    <div class="alert alert-danger" *ngIf="error">
+      {{error}}
+    </div>
+    <form [formGroup]="searchForm" (ngSubmit)="search()">
+
+      <div class="row">
+
+        <div class="mb-3 col-4">
+          <input type="text" class="form-control" placeholder="Search..." aria-label="Search" formControlName="keyword"
+                 id="keyword">
+        </div>
+
+        <div class="mb-3 col-4">
+          <ng-select id="status" [formControlName]="'status'" [clearable]="false" placeholder="Select">
+            <ng-option value="active">Active</ng-option>
+            <ng-option value="inactive">Inactive</ng-option>
+          </ng-select>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <div class="text-muted mb-2 align-middle">
+
+    <ngb-pagination class="float-end"
+                    [boundaryLinks]="true"
+                    [pageSize]="pageSize"
+                    [collectionSize]="results?.totalElements"
+                    [(page)]="pageNumber"
+                    [maxSize]="5"
+                    [ellipses]="true"
+                    [rotate]="true"
+                    (pageChange)="search()">
+    </ngb-pagination>
+
+    Found {{results?.totalElements}} users
+  </div>
+
+  <table class="table align-middle">
+
+    <thead class="table-primary">
+    <tr>
+      <th></th>
+      <th>#</th>
+      <th>Username</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Partner</th>
+      <th>Source Countries</th>
+      <th>Approver</th>
+      <th>Purpose</th>
+      <th>Read Only?</th>
+      <th>Status</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let user of results?.content">
+      <td>
+        <div *ngIf="!loggedInUser.readOnly && canEdit(user)" ngbDropdown placement="bottom-left" (click)="$event.stopPropagation();" container="body">
+          <button class="btn btn-xs hide-after" ngbDropdownToggle>
+            <i class="fas fa-ellipsis-h"></i>
+          </button>
+          <ul ngbDropdownMenu>
+            <li ngbDropdownItem (click)="editUser(user)">Edit User</li>
+            <li ngbDropdownItem (click)="deleteUser(user)">Delete User</li>
+            <li class="dropdown-divider"></li>
+            <li ngbDropdownItem (click)="updatePassword(user)">Change Password</li>
+            <li class="dropdown-divider"></li>
+            <li ngbDropdownItem (click)="resetAuthentication(user)">Reset Authentication</li>
+          </ul>
+        </div>
+      </td>
+      <td> {{user.id}}</td>
+      <td> {{user.username}}</td>
+      <td>{{user.firstName}}</td>
+      <td>{{user.lastName}}</td>
+      <td>{{user.email}}</td>
+      <td>{{user.role}}</td>
+      <td><a [href]="user.partner.websiteUrl" target="_blank"
+             [title]="user.partner.name">{{user.partner.abbreviation}}</a></td>
+      <td>{{getSourceCountries(user)}}</td>
+      <td *ngIf="user.approver">{{user.approver?.firstName + " " + user.approver?.lastName}}</td>
+      <td *ngIf="!user.approver"></td>
+      <td>{{user.purpose}}</td>
+      <td>{{user.readOnly}}</td>
+      <td>{{user.status}}</td>
+    </tr>
+
+    <!-- loading -->
+    <tr *ngIf="loading">
+      <td colspan="42">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+      </td>
+    </tr>
+
+    <!-- no results -->
+    <tr *ngIf="!loading && !results?.totalElements">
+      <td colspan="42">
+        <span class="text-muted">(no matching users)</span>
+      </td>
+    </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
+

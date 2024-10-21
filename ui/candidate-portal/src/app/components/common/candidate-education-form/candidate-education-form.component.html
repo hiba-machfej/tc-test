@@ -1,0 +1,117 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<form class="card" [formGroup]="form" *ngIf="!loading">
+
+  <div class="row">
+
+    <!-- EDUCATION TYPE / LEVEL -->
+    <div class="col-12">
+      <div class="mb-3">
+        <label class="form-label" for="educationType">{{ 'FORM.EDUCATION.EDUCATIONTYPE' | translate }} <sup>*</sup></label>
+        <ng-select id="educationType" [formControlName]="'educationType'" [clearable]="false"
+                   placeholder="{{ 'FORM.PLACEHOLDER.SELECT' | translate }}">
+          <ng-option value="Associate">{{ 'EDUCATIONTYPE.ASSOCIATE' | translate }}</ng-option>
+          <ng-option value="Vocational">{{ 'EDUCATIONTYPE.VOCATIONAL' | translate }}</ng-option>
+          <ng-option value="Bachelor">{{ 'EDUCATIONTYPE.BACHELOR' | translate }}</ng-option>
+          <ng-option value="Masters">{{ 'EDUCATIONTYPE.MASTERS' | translate }}</ng-option>
+          <ng-option value="Doctoral">{{ 'EDUCATIONTYPE.DOCTORAL' | translate }}</ng-option>
+        </ng-select>
+      </div>
+    </div>
+
+    <!-- MAJOR  -->
+    <div class="col-12">
+      <div class="mb-3">
+        <label class="form-label" for="educationMajorId">{{ 'FORM.EDUCATION.EDUCATIONMAJORID' | translate }} <sup>*</sup></label>
+        <ng-select id="educationMajorId" [formControlName]="'educationMajorId'" [items]="majors" [clearable]="false"
+                   bindValue="id" bindLabel="name" placeholder="{{ 'FORM.PLACEHOLDER.SELECTORTYPE' | translate }}">
+        </ng-select>
+      </div>
+    </div>
+
+    <!-- COURSE NAME -->
+    <div class="col-12">
+      <div class="mb-3">
+        <label class="form-label" for="courseName">{{ 'FORM.EDUCATION.COURSENAME' | translate }} <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="" id="courseName" [formControlName]="'courseName'">
+      </div>
+    </div>
+
+    <!-- LOCATION -->
+    <div class="col-12 col-md-6">
+      <div class="mb-3">
+        <label class="form-label" for="countryId">{{ 'FORM.EDUCATION.COUNTRYID' | translate }} <sup>*</sup></label>
+        <ng-select id="countryId" [formControlName]="'countryId'" [items]="countries" [clearable]="false"
+                   bindLabel="name" bindValue="id" placeholder="{{ 'FORM.PLACEHOLDER.SELECTORTYPE' | translate }}">
+        </ng-select>
+      </div>
+    </div>
+
+    <!-- Institution -->
+    <div class="col-12 col-md-6">
+      <div class="mb-3">
+        <label class="form-label" for="institution">{{ 'FORM.EDUCATION.INSTITUTION' | translate }} <sup>*</sup></label>
+        <input type="text" class="form-control" placeholder="" id="institution" [formControlName]="'institution'">
+      </div>
+    </div>
+
+    <!-- COURSE LENGTH -->
+    <div class="col-12 col-md-6">
+      <div class="mb-3">
+        <label class="form-label" for="lengthOfCourseYears">{{ 'FORM.EDUCATION.LENGTHOFCOURSEYEARS' | translate }} <sup>*</sup></label>
+        <input type="number" class="form-control" placeholder="" id="lengthOfCourseYears" [formControlName]="'lengthOfCourseYears'">
+      </div>
+    </div>
+
+    <!-- GRADUATION YEAR -->
+    <div class="col-8 col-md-4">
+      <div class="mb-3">
+        <label class="form-label" for="yearCompleted">{{ 'FORM.EDUCATION.DATECOMPLETED' | translate }} <sup>*</sup></label>
+        <ng-select id="yearCompleted" [formControlName]="'yearCompleted'" [items]="years" [clearable]="false"
+                   placeholder="{{ 'FORM.PLACEHOLDER.SELECTORTYPE' | translate }}">
+        </ng-select>
+      </div>
+    </div>
+
+    <!-- GRADUATION YEAR -->
+    <div class="col-4 col-md-2">
+      <div class="mb-3">
+        <input class="form-check-input" type="radio" id="incomplete" [value]="true" [formControlName]="'incomplete'">
+        <label class="form-check-label" for="incomplete">
+          {{ 'FORM.EDUCATION.INCOMPLETE' | translate }}
+        </label>
+      </div>
+    </div>
+
+  </div>
+
+  <app-error [error]="error"></app-error>
+
+  <div class="text-center mt-4 submit">
+    <button class="btn btn-outline-primary"
+            [disabled]="loading || saving"
+            (click)="cancel()">
+      {{ 'FORM.JOBEXPERIENCE.BUTTON.CANCEL' | translate }}
+    </button>
+    <button class="btn btn-primary"
+            [disabled]="form.invalid"
+            (click)="save()">
+      {{ 'FORM.LABEL.SAVE' | translate }}
+    </button>
+  </div>
+
+</form>

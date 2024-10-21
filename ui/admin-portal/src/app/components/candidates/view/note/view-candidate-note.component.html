@@ -1,0 +1,77 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="loading">
+  <i class="fas fa-spinner fa-spin"></i> loading...
+</div>
+<div *ngIf="error">
+  {{error}}
+</div>
+<div class="d-flex justify-content-between mb-2" >
+  <div>
+    <h3 *ngIf="!loading && editable">Notes</h3>
+  </div>
+  <div>
+    <button *ngIf="editable" type="button" class="btn btn-sm btn-primary me-2" (click)="createCandidateNote()">
+      <i class="fas fa-plus"></i> Add Note
+    </button>
+  </div>
+</div>
+
+
+<div *ngIf="!notes || notes.length == 0">
+  <div class="row">
+    <div class="col-sm-12">
+      No notes entered
+    </div>
+  </div>
+</div>
+
+
+<div *ngFor="let candidateNote of notes; let i = index">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-start">
+      <div>
+        {{candidateNote.title}}
+      </div>
+      <div class="float-end d-flex ms-3">
+        <button *ngIf="candidateNote.comment" class="btn btn-sm btn-default" (click)="showNote(candidateNote)"><i
+          class="fas fa-ellipsis-h"></i></button>
+        <button *ngIf="editable" class="btn btn-sm btn-default" (click)="editCandidateNote(candidateNote)"><i
+          class="fas fa-edit"></i></button>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div *ngIf="candidateNote.comment && candidateNote.showDetail">
+        <div [innerHTML]="candidateNote.comment"></div>
+        <hr/>
+      </div>
+
+      <div *ngIf="candidateNote">
+        <app-updated-by *ngIf="candidateNote" [object]="candidateNote"></app-updated-by>
+      </div>
+    </div>
+  </div>
+  <hr/>
+</div>
+
+<div class="text-center" *ngIf="hasMore">
+  <button type="button" class="btn btn-sm btn-outline-dark" (click)="loadMore()">Load More</button>
+</div>
+
+
+

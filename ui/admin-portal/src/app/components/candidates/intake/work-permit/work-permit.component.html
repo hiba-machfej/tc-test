@@ -1,0 +1,53 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+  <div class="mb-3">
+    <label class="form-label" for="workPermit">Do you have a valid work permit?</label>
+    <div class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="workPermit" [formControlName]="'workPermit'" (clear)="setNoResponse('workPermit')"
+               [items]="workPermitOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key">
+    </ng-select>
+  </div>
+  <div *ngIf="workPermit === 'YesNotDesired' || workPermit === 'No'">
+    <div class="mb-3">
+      <label class="form-label" for="workPermitDesired">Are you legally able to obtain a work permit in your desired field?</label>
+      <ng-select id="workPermitDesired" [formControlName]="'workPermitDesired'" (clear)="setNoResponse('workPermitDesired')"
+                 [items]="workPermitDesiredOptions" [clearOnBackspace]="false"
+                 placeholder="Select" bindLabel="stringValue" bindValue="key">
+      </ng-select>
+    </div>
+    <div *ngIf="workPermitDesired === 'No'">
+      <div class="mb-3">
+          <label class="form-label" for="workPermitDesiredNotes">If no, please add any additional notes</label>
+          <textarea type="text" class="md-textarea-auto form-control" rows="3"
+                    id="workPermitDesiredNotes" [formControlName]="'workPermitDesiredNotes'"
+                    placeholder=""></textarea>
+      </div>
+    </div>
+  </div>
+</form>
+
+

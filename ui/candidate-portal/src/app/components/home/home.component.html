@@ -1,0 +1,118 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="container">
+
+  <app-loading [loading]="loading"></app-loading>
+
+  <ng-container *ngIf="!loading">
+
+    <h2>{{ 'HOME.TITLE' | translate:{name: getCandidateName()} }}</h2>
+
+    <ng-container [ngSwitch]="candidate?.status">
+
+      <!-- DRAFT - prompt candidate to complete registration -->
+      <ng-container *ngSwitchCase="'draft'">
+        <p>
+          {{ 'HOME.DRAFT.EXPLANATION' | translate }}
+        </p>
+
+        <div class="text-start">
+          <a class="btn btn-primary" [routerLink]="'/register'">{{ 'HOME.DRAFT.BUTTON' | translate }}</a>
+        </div>
+      </ng-container>
+
+      <!-- PENDING - prompt the user to review their profile -->
+      <ng-container *ngSwitchCase="'pending'">
+        <p>
+          {{ 'HOME.PENDING.EXPLANATION' | translate:{partner: getPartnerName()} }}
+        </p>
+
+        <div class="text-start">
+          <a class="btn btn-primary" [routerLink]="'/profile'">{{ 'HOME.PENDING.BUTTON' | translate }}</a>
+        </div>
+      </ng-container>
+
+      <!-- ACTIVE - prompt the user to review their profile -->
+      <ng-container *ngSwitchCase="'active'">
+        <p>
+          {{ 'HOME.ACTIVE.EXPLANATION' | translate:{partner: getPartnerName()} }}
+        </p>
+
+        <div class="text-start">
+          <a class="btn btn-primary" [routerLink]="'/profile'">{{ 'HOME.ACTIVE.BUTTON' | translate }}</a>
+        </div>
+      </ng-container>
+
+      <!-- EMPLOYED - prompt the user to review their profile -->
+      <ng-container *ngSwitchCase="'employed'">
+        <p>
+          {{ 'HOME.EMPLOYED.EXPLANATION' | translate }}
+        </p>
+
+        <div class="text-start">
+          <a class="btn btn-primary" [routerLink]="'/profile'">{{ 'HOME.ACTIVE.BUTTON' | translate }}</a>
+        </div>
+      </ng-container>
+
+      <!-- INCOMPLETE - show reason and ability to resubmit?? -->
+      <ng-container *ngSwitchCase="'incomplete'">
+        <p>
+          {{ 'HOME.INCOMPLETE.EXPLANATION' | translate }}
+        </p>
+
+        <p class="alert alert-warning" *ngIf="candidate.candidateMessage">
+          {{candidate.candidateMessage}}
+        </p>
+
+        <div class="text-start">
+          <a class="btn btn-primary" [routerLink]="'/register'">{{ 'HOME.INCOMPLETE.BUTTON' | translate }}</a>
+        </div>
+      </ng-container>
+
+      <!-- INELIGIBLE - show reason and ability to resubmit?? -->
+      <ng-container *ngSwitchCase="'ineligible'">
+        <p>
+          {{ 'HOME.INELIGIBLE.EXPLANATION' | translate }}
+        </p>
+
+        <p class="alert alert-warning" *ngIf="candidate.candidateMessage">
+          {{candidate.candidateMessage}}
+        </p>
+
+        <div class="text-start">
+          <a class="btn btn-primary" [routerLink]="'/profile'">{{ 'HOME.INELIGIBLE.BUTTON' | translate }}</a>
+          <a class="btn btn-secondary" [href]="getEligibilityLink()" target="_blank">
+            <fa-icon icon="external-link-alt"></fa-icon> {{ 'ERROR.CRITERIA_INVALID.LINK' | translate }}</a>
+        </div>
+      </ng-container>
+
+      <!-- default -->
+      <ng-container *ngSwitchDefault>
+        <p>
+          {{ 'HOME.ACTIVE.EXPLANATION' | translate }}
+        </p>
+
+        <div class="text-start">
+          <a class="btn btn-primary" [routerLink]="'/profile'">{{ 'HOME.ACTIVE.BUTTON' | translate }}</a>
+        </div>
+      </ng-container>
+
+    </ng-container>
+
+  </ng-container>
+
+</div>

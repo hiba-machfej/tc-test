@@ -1,0 +1,108 @@
+/*!
+ * Copyright (c) 2021 Talent Beyond Boundaries.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
+@import "~src/scss/variables";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/buttons";
+
+.btn-primary, .btn-secondary, .btn-danger, .btn-success, .btn-info, .btn-warning, .btn-accent-1, .btn-accent-2 {
+  color: $white;
+  box-shadow: 1px 1px 1px #8b8c93;
+  &:hover {
+    color: $light;
+  }
+  &:disabled {
+    background-color: $accent3;
+    color: $accent1;
+    border-color: $accent3;
+  }
+}
+
+.btn-accent-1, .btn-accent-2, .btn-accent-3 {
+  &:hover {
+    background-color: fade-out($accent2, 0.3);
+  }
+}
+
+.btn-outline-primary, .btn-outline-secondary, btn-outline-danger, btn-outline-warning {
+  box-shadow: 1px 1px 3px #8b8c93;
+  border-width: 1.5px;
+}
+
+.btn-link {
+  color: $accent1;
+  background-color: transparent;
+
+  &:hover {
+    color: $primary;
+    text-decoration: none;
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  &:active {
+    color: $primary;
+  }
+
+  &:disabled,
+  &.disabled {
+    color: $accent3;
+  }
+}
+
+a {
+  color: $primary;
+  background-color: transparent;
+  text-decoration: none;
+
+  &:hover {
+    color: $secondary;
+    text-decoration: none;
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  &:active {
+    color: $secondary;
+  }
+
+  &:disabled,
+  &.disabled {
+    color: $light;
+    background-color: $accent2;
+  }
+}
+
+button {
+  a {
+    i {
+      color: $primary;
+      &:hover {
+        color: $secondary;
+      }
+    }
+  }
+}
+
+.link {
+  color: $info;
+}
+
+button:focus {
+  box-shadow: none !important;
+  text-decoration: none !important;
+}

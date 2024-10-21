@@ -1,0 +1,16 @@
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+  <div *ngIf="editable" class="mb-3">
+    <label class="form-label" for="visaJobTbbEligibility">TC Eligibility Assessment?</label>
+    <div class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="visaJobTbbEligibility" [formControlName]="'visaJobTbbEligibility'" [items]="jobEligibilityAssessOptions"
+               placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+  </div>
+</form>

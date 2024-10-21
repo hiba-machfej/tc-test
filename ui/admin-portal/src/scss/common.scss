@@ -1,0 +1,167 @@
+/*!
+ * Copyright (c) 2021 Talent Beyond Boundaries.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
+@import "~src/scss/variables";
+@import 'bootstrap/scss/bootstrap-reboot';
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap/scss/pagination';
+
+.section {
+  padding: 10px 0;
+
+  .section-header {
+    padding: 10px 0 0 0;
+  }
+
+  .section-body {
+    padding: 10px 0;
+  }
+}
+
+.link,
+.link:not([href]):not([tabindex]){
+  color: $primary;
+  cursor: pointer;
+  text-decoration: $link-decoration;
+  &:hover {
+    color: $secondary;
+    text-decoration: $link-hover-decoration;
+  }
+}
+
+.page-link {
+  position: relative;
+  display: block;
+  color: $accent1;
+  background-color: $accent3;
+  border-color: $light;
+
+  &:hover {
+    z-index: 2;
+    text-decoration: none;
+    background-color: $accent2;
+    color: $light;
+  }
+
+  &:focus {
+    z-index: 2;
+    outline: $pagination-focus-outline;
+    box-shadow: $pagination-focus-box-shadow;
+  }
+}
+
+.page-item {
+
+  &.active .page-link {
+    background-color: $accent2;
+    border-color: $accent2;
+  }
+
+  &.disabled .page-link {
+    color: $light;
+    background-color: $accent3;
+    pointer-events: none;
+    border-color: $light;
+    // Opinionated: remove the "hand" cursor set previously for .page-link
+    cursor: auto;
+  }
+}
+
+table {
+  background-color: $white;
+  border: $white;
+  border-radius: 5px;
+  td {
+    white-space: nowrap;
+    a {
+      > i {
+        color: $info;
+        &:hover {
+          color: $accent1;
+        }
+      }
+      &:hover {
+        color: $secondary;
+      }
+    }
+  }
+}
+
+.card-header {
+  background-color: $accent3 !important;
+  background-image: var(--bs-gradient);
+  font-size: 1.1em;
+  font-weight: 400;
+  color: $dark !important;
+  margin-bottom: 0;
+}
+
+.col-form-label i {
+  margin-right: 0.70em;
+}
+
+.form-control-plaintext {
+  font-weight: 300;
+  padding-top: 0;
+  font-size: inherit;
+}
+
+.card-body {
+  p {
+    font-weight: 300;
+  }
+  span {
+    font-weight: 300;
+  }
+}
+
+.accordion > .card {
+  overflow: initial;
+}
+
+.accordion-button {
+  font-size: 1.1rem;
+  color: $dark;
+  font-weight: 400;
+  background-image: var(--bs-gradient);
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #999 !important;
+  opacity: 1; /* Firefox */
+}
+
+//// The right hand side panels showing more detail of selected item
+.detail-panel {
+  border-radius: 5px;
+  padding: 1rem;
+}
+
+.side-panel-color {
+  background-color: fade-out($accent3, 0.7);
+}
+
+.text-female {
+  color: #9b5567;
+}
+
+.text-male {
+  color: #1973b8;
+}
+
+.fw-600 {
+  font-weight: 600;
+}

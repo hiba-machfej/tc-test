@@ -1,0 +1,15 @@
+<div *ngIf="loading">
+  <i class="fas fa-spinner fa-spin"></i> loading...
+</div>
+<div class="alert alert-danger" *ngIf="error">
+  {{error}}
+</div>
+
+<ul class="list-group">
+  <li *ngFor="let chat of chats" (click)="selectCurrent(chat)" [ngClass]="{'bg-active-custom': currentChat?.id == chat.id}"
+     class="list-group-item list-group-item-action">
+    <app-view-chat
+      [chat]="chat">
+    </app-view-chat>
+  </li>
+</ul>

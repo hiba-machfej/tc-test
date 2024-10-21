@@ -1,0 +1,171 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="modal-header">
+
+  <h4 class="modal-title">{{title}}</h4>
+
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="dismiss()"></button>
+
+</div>
+
+<div class="modal-body">
+
+  <div *ngIf="working">
+    <i class="fas fa-spinner fa-spin"></i>
+  </div>
+
+  <div *ngIf="!working">
+    <div class="alert alert-danger" *ngIf="error">
+      {{error}}
+    </div>
+
+    <form [formGroup]="userForm">
+      <div class="mb-3">
+        <label class="form-label" for="email">Email *</label>
+        <input type="email" class="form-control" id="email" formControlName="email" pattern="{{emailRegex}}">
+        <div *ngIf="userForm.get('email').touched || userForm.get('email').dirty">
+          <small *ngIf="userForm.get('email').errors?.['pattern']" class="text-danger">
+            Please enter valid email address
+          </small>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="username">Username *</label>
+        <input type="text" class="form-control" id="username" formControlName="username">
+      </div>
+      <div class="mb-3" *ngIf="create">
+        <label class="form-label" for="password">Password *</label>
+        <input type="text" class="form-control" id="password" formControlName="password">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="firstName">First Name *</label>
+        <input type="text" class="form-control" id="firstName" formControlName="firstName">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="lastName">Last Name *</label>
+        <input type="text" class="form-control" id="lastName" formControlName="lastName">
+      </div>
+
+      <!-- Partner  -->
+      <div class="mb-3" *ngIf="canAssignPartner()">
+        <label class="form-label">Partner *</label>
+        <ng-select
+          id="partner"
+          [items]="partners"
+          [multiple]="false"
+          [closeOnSelect]="true"
+          [searchable]="true"
+          placeholder="Select or type..."
+          bindLabel="name"
+          bindValue="id"
+          [formControlName]="'partnerId'">
+        </ng-select>
+      </div>
+
+      <div class="mb-3" *ngIf="!create">
+        <label class="form-label" for="status">Status</label>
+        <ng-select id="status" [formControlName]="'status'" placeholder="Select">
+          <ng-option value="active">Active</ng-option>
+          <ng-option value="inactive">Inactive</ng-option>
+        </ng-select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="role">Role *</label>
+        <ng-select
+          id="role"
+          [items]="roleOptions"
+          [formControlName]="'role'"
+          [clearable]="false"
+          placeholder="Select"
+          bindValue="key"
+          bindLabel="stringValue">
+        </ng-select>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="jobCreator" formControlName="jobCreator">
+        <label class="form-check-label" for="jobCreator">Job Creator?</label>
+      </div>
+
+      <!-- Approver if required — will be a TC admin user -->
+      <div class="mb-3">
+        <label class="form-label">Approver</label>
+        <ng-select
+          id="approver"
+          [items]="approvers"
+          [multiple]="false"
+          [closeOnSelect]="true"
+          [searchable]="true"
+          placeholder="Select or type..."
+          bindLabel="firstName"
+          bindValue="id"
+          [formControlName]="'approverId'">
+          <!-- MODEL concatenate two properties for display in form - Enables viewing and searching potential approvers (admin users) by full name -->
+          <ng-template ng-label-tmp let-item="item">
+            {{item.firstName}} {{item.lastName}}
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item" let-search="searchTerm">
+            {{item.firstName}} {{item.lastName}}
+          </ng-template>
+        </ng-select>
+        <p class="text-muted">If required, who approved this registration?</p>
+      </div>
+
+      <!-- If approval was required for this user registration, what was the reason given? -->
+      <div class="mb-3">
+        <label class="form-label" for="purpose">Purpose</label>
+        <input type="text" class="form-control" id="purpose" formControlName="purpose">
+        <p class="text-muted">And what is the reason for their TC use?</p>
+      </div>
+
+      <!-- SOURCE COUNTRIES  -->
+      <div class="mb-3">
+        <label class="form-label">Source Country</label>
+        <ng-select
+          id="sourceCountry"
+          [items]="countries"
+          [multiple]="true"
+          [closeOnSelect]="false"
+          [searchable]="true"
+          placeholder="Select or type..."
+          bindLabel="name"
+          [formControlName]="'sourceCountries'">
+        </ng-select>
+        <p class="text-muted">Leave blank if there are no restrictions, otherwise add one or more countries to which admin is restricted.</p>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="readOnly" formControlName="readOnly">
+        <label class="form-check-label" for="readOnly">Read Only?</label>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="usingMfa" formControlName="usingMfa">
+        <label class="form-check-label" for="usingMfa">Authentication app?</label>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="onSave()"
+                [disabled]="userForm.invalid || working">
+          <i class="fas fa-spinner fa-spin" *ngIf="working"></i>
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

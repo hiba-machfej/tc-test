@@ -1,0 +1,17 @@
+<div class="card">
+
+  <div class="card-header">
+    Is candidate open to media?
+    <div class="float-end" *ngIf="editable">
+      <button class="btn btn-sm btn-secondary" (click)="editMediaWillingness()">
+        <i class="fas fa-edit"></i></button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <p [innerHtml]="candidate?.mediaWillingness"
+       appHighlightSearch>
+    </p>
+  </div>
+
+</div>

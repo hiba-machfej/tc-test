@@ -1,0 +1,68 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+
+  <div class="mb-3">
+    <label class="form-label" for="canDrive">
+      Can you drive?
+    </label>
+    <div class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="canDrive" [formControlName]="'canDrive'" (clear)="setNoResponse('canDrive')"
+               [items]="canDriveOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+  </div>
+
+  <div *ngIf="canDrive === 'Yes'">
+    <div class="mb-3">
+      <label class="form-label" for="drivingLicense">
+        Do you have a driving license?
+      </label>
+      <ng-select id="drivingLicense" [formControlName]="'drivingLicense'" (clear)="setNoResponse('drivingLicense')"
+                 [items]="drivingLicenseOptions" [clearOnBackspace]="false"
+                 placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+    </div>
+
+    <div *ngIf="hasDrivingLicense">
+      <div class="mb-3">
+        <label class="form-label" for="drivingLicenseExp">
+          Expiry Date
+        </label>
+        <app-date-picker id="drivingLicenseExp" [control]="form.controls.drivingLicenseExp"></app-date-picker>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="drivingLicenseCountryId">
+          Country of Issue
+        </label>
+        <ng-select id="drivingLicenseCountryId" [formControlName]="'drivingLicenseCountryId'" (clear)="setNoResponse('drivingLicenseCountryId')"
+                   [items]="countries" [clearOnBackspace]="false"
+                   placeholder="Select" bindLabel="name" bindValue="id"></ng-select>
+      </div>
+
+    </div>
+
+  </div>
+
+</form>
+

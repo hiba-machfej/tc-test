@@ -1,0 +1,78 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div class="alert alert-danger" *ngIf="error">
+  {{error}}
+</div>
+
+<div class="card">
+  <div class="card-body">
+
+    <form [formGroup]="form">
+      <div class="mb-3">
+        <div class="exam d-flex align-items-baseline justify-content-between">
+          <label class="form-label" [for]="'exam'+myRecordIndex">Exam</label>
+          <div class="float-end d-flex align-items-center">
+            <app-autosave-status
+              [saving]="saving"
+              [typing]="typing">
+            </app-autosave-status>
+            <button class="btn" (click)="doDelete()">
+                <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <ng-select [id]="'examType'+myRecordIndex" [formControlName]="'examType'" (clear)="setNoResponse('examType')"
+                   [items]="examOptions" [clearOnBackspace]="false"
+                   placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+      </div>
+
+      <div *ngIf="isOtherExam">
+        <div class="mb-3">
+          <label class="form-label" [for]="'otherExam'+myRecordIndex">Other Exam Name</label>
+          <input type="text" class="form-control" [id]="'otherExam'+myRecordIndex" [formControlName]="'otherExam'">
+        </div>
+      </div>
+
+      <div *ngIf="hasSelectedExam">
+        <div class="mb-3">
+          <label class="form-label" [for]="'examScore'+myRecordIndex">Score</label>
+          <app-ielts-score-validation
+            [id]="'examScore'+myRecordIndex"
+            [control]="form.controls.examScore"
+            [examType]="form.controls.examType.value">
+          </app-ielts-score-validation>
+        </div>
+
+
+        <div class="mb-3">
+          <label class="form-label" [for]="'examYear'+myRecordIndex">
+            In what year did you take the test?
+          </label>
+          <ng-select [id]="'examYear'+myRecordIndex" [formControlName]="'examYear'" [items]="years"
+                     [clearOnBackspace]="false" placeholder="Select"></ng-select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" [for]="'examNotes'+myRecordIndex">Notes</label>
+          <textarea type="text" class="md-textarea-auto form-control" rows="3"
+                    [id]="'examNotes'+myRecordIndex" [formControlName]="'examNotes'"
+                    placeholder=""></textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+

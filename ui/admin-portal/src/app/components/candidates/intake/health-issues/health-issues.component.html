@@ -1,0 +1,29 @@
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+
+  <div class="mb-3">
+    <label class="form-label" for="healthIssues">
+      Do you have any health or disability issues?
+    </label>
+    <div *ngIf="editable" class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="healthIssues" [formControlName]="'healthIssues'" (clear)="setNoResponse('healthIssues')"
+               [items]="healthIssuesOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key">
+    </ng-select>
+  </div>
+
+  <div *ngIf="hasNotes" class="mb-3">
+    <label class="form-label" for="healthIssuesNotes">Notes</label>
+    <textarea type="text" class="md-textarea-auto form-control" rows="4"
+              id="healthIssuesNotes" [formControlName]="'healthIssuesNotes'"
+              placeholder=""></textarea>
+  </div>
+
+</form>

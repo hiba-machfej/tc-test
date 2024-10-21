@@ -1,0 +1,71 @@
+<!--
+  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it under
+  ~ the terms of the GNU Affero General Public License as published by the Free
+  ~ Software Foundation, either version 3 of the License, or any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU Affero General Public License
+  ~ along with this program. If not, see https://www.gnu.org/licenses/.
+  -->
+
+<div *ngIf="error">
+  {{error}}
+</div>
+<form [formGroup]="form">
+  <div class="mb-3">
+    <label class="form-label" for="unrwaRegistered">
+      Are you registered with UNRWA?
+    </label>
+    <div class="float-end">
+      <app-autosave-status
+        [saving]="saving"
+        [typing]="typing">
+      </app-autosave-status>
+    </div>
+    <ng-select id="unrwaRegistered" [formControlName]="'unrwaRegistered'" (clear)="setNoResponse('unrwaRegistered')"
+               [items]="unrwaRegisteredOptions" [clearOnBackspace]="false"
+               placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+  </div>
+
+  <div *ngIf="showAll">
+    <div *ngIf="unrwaRegistered == 'Yes'">
+      <div class="mb-3">
+        <label class="form-label" for="unrwaNumber">What is your UNRWA number?</label>
+        <input type="text" class="form-control"
+               id="unrwaNumber" [formControlName]="'unrwaNumber'">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="unrwaFile">How many people are included on your UNRWA file?</label>
+        <input type="number" class="form-control"
+               id="unrwaFile" [formControlName]="'unrwaFile'">
+      </div>
+    </div>
+
+    <div *ngIf="unrwaRegistered == 'No'">
+      <div class="mb-3">
+        <label class="form-label" for="unrwaNotRegStatus">
+          What best describes your status not being registered?
+        </label>
+        <ng-select id="unrwaNotRegStatus" [formControlName]="'unrwaNotRegStatus'" (clear)="setNoResponse('unrwaNotRegStatus')"
+                   [items]="NotRegisteredStatusOptions" [clearOnBackspace]="false"
+                   placeholder="Select" bindLabel="stringValue" bindValue="key"></ng-select>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="hasNotes">
+    <div class="mb-3">
+      <label class="form-label" for="unrwaNotes">Additional Notes</label>
+      <textarea type="text" class="md-textarea-auto form-control" rows="3"
+                id="unrwaNotes" [formControlName]="'unrwaNotes'"
+                placeholder="" ></textarea>
+    </div>
+  </div>
+
+</form>
+
