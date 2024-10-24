@@ -1,0 +1,38 @@
+name: Deploy to Amplify Hosting on PR Merge with Directory Check
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check for changes to ui/candidate-portal
+        if: contains(github.event.pull_request.files, 'ui/candidate-portal/**/*')
+        run: |
+          echo "Changes detected in ui/candidate-portal, proceeding with deployment."
+      - name: Trigger deployment if PR title contains "deploy"
+        if: contains(github.event.pull_request.title, 'deploy') && contains(github.event.pull_request.files, 'ui/candidate-portal/**/*')
+        run: |
+          # Replace with your Amplify Hosting API credentials
+          amplify_api_key="sk6m2lyd2zfbpoveqtbjydko2e"
+          amplify_app_id="d1z3wefy398y6v"
+          amplify_branch_name="main"
+
+          # Use Amplify Hosting API to trigger deployment
+          curl -X POST "https://api.amplify.aws/graphql" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $amplify_api_key" \
+            -d '{
+              "query": "mutation Deploy ($appId: ID!, $branchName: String!) { \\
+                deploy (appId: $appId, branchName: $branchName) { \\
+                  deploymentId \\
+                } \\
+              }",
+              "variables": {
+                "appId": "$amplify_app_id",
+                "branchName": "$amplify_branch_name"
+              }
+            }'
