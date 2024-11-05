@@ -1,0 +1,53 @@
+name: Filter PR Previews by Directory
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  filter-previews:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get list of changed files
+        id: changed-files
+        run: |
+          # Get the list of changed files and output as a JSON array
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | jq -R . | jq -s .)
+          echo "::set-output name=files::$CHANGED_FILES"
+
+      - name: Check if changes affect admin-portal
+        id: check-admin-portal
+        run: |
+          echo "${{ steps.changed-files.outputs.files }}" | jq 'contains(["ui/admin-portal"])' > admin-portal-changed
+          if grep -q "false" admin-portal-changed; then
+            echo "::set-output name=affected::false"
+          else
+            echo "::set-output name=affected::true"
+          fi
+
+      - name: Check if changes affect candidate-portal
+        id: check-candidate-portal
+        run: |
+          echo "${{ steps.changed-files.outputs.files }}" | jq 'contains(["ui/candidate-portal"])' > candidate-portal-changed
+          if grep -q "false" candidate-portal-changed; then
+            echo "::set-output name=affected::false"
+          else
+            echo "::set-output name=affected::true"
+          fi
+
+      - name: Post comment on PR
+        if: ${{ steps.check-admin-portal.outputs.affected == 'false' && steps.check-candidate-portal.outputs.affected == 'false' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { github, context } = require('@actions/github');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "No relevant changes detected for admin-portal or candidate-portal. Consider skipping preview builds for this PR."
+            })
