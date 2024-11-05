@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
       - name: Get Amplify preview URL from comment
         id: get-preview-url
         uses: actions/github-script@v6
@@ -59,6 +58,7 @@ jobs:
         uses: actions/github-script@v6
         if: steps.check-link.outputs.link_status == 'broken'
         with:
+          github-token: ${{ secrets.PAT_TOKEN }}  # Use the PAT instead of default GITHUB_TOKEN
           script: |
             const commentId = ${{ steps.get-preview-url.outputs.comment_id }};
 
