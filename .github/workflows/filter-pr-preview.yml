@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Pause to allow Amplify deployment
+        run: sleep 180  # Waits for 3 minutes for AWS Amplify to complete deployment
+
       - name: Get Amplify preview URL from comment
         id: get-preview-url
         uses: actions/github-script@v6
@@ -20,7 +23,7 @@ jobs:
               repo: context.repo.repo,
             });
 
-            // Look for the comment from "aws-amplify" with the specific URL format
+            // Find the comment from "aws-amplify" containing the preview link
             const amplifyComment = comments.find(comment => 
               comment.user.login.startsWith("aws-amplify") &&
               comment.body.includes("Access this pull request here:")
@@ -38,45 +41,30 @@ jobs:
               return;
             }
 
-            // Set the URL as an output variable
+            // Set the URL and comment ID as output variables
             core.setOutput("preview_url", urlMatch[0]);
             core.setOutput("comment_id", amplifyComment.id);
 
-      - name: Wait for preview link to become active
-        id: wait-for-link
+      - name: Check if preview link is reachable
+        id: check-link
         run: |
           PREVIEW_URL="${{ steps.get-preview-url.outputs.preview_url }}"
-          MAX_ATTEMPTS=20  # Max number of attempts
-          SLEEP_INTERVAL=30  # Seconds between checks
-          ATTEMPTS=0
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $PREVIEW_URL)
 
-          while [ "$ATTEMPTS" -lt "$MAX_ATTEMPTS" ]; do
-            HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $PREVIEW_URL)
-
-            if [ "$HTTP_STATUS" -eq "200" ]; then
-              echo "::set-output name=link_status::active"
-              exit 0
-            fi
-
-            # Increment the attempt counter
-            ATTEMPTS=$((ATTEMPTS + 1))
-            echo "Attempt $ATTEMPTS: Preview link not active yet, waiting..."
-
-            # Wait for the next interval before checking again
-            sleep $SLEEP_INTERVAL
-          done
-
-          # If loop exits, link is still broken after max attempts
-          echo "::set-output name=link_status::broken"
+          if [ "$HTTP_STATUS" -eq "200" ]; then
+            echo "::set-output name=link_status::active"
+          else
+            echo "::set-output name=link_status::broken"
+          fi
 
       - name: Delete or notify if preview link is broken
         uses: actions/github-script@v6
-        if: steps.wait-for-link.outputs.link_status == 'broken'
+        if: steps.check-link.outputs.link_status == 'broken'
         with:
           script: |
             const commentId = ${{ steps.get-preview-url.outputs.comment_id }};
 
-            // Delete the original comment if the link is broken
+            // Delete the original Amplify comment if the link is broken
             if (commentId) {
               await github.rest.issues.deleteComment({
                 issue_number: context.issue.number,
