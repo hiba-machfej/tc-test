@@ -1,56 +1,86 @@
-name: Filter PR Previews by Directory
+name: Check AWS Amplify PR Preview Link
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  filter-previews:
+  check-preview-link:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Get list of changed files
-        id: changed-files
-        run: |
-          # Get the list of changed files and output as a JSON array
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | jq -R . | jq -s .)
-          echo "::set-output name=files::$CHANGED_FILES"
-
-      - name: Check if changes affect admin-portal
-        id: check-admin-portal
-        run: |
-          echo "${{ steps.changed-files.outputs.files }}" | jq 'contains(["ui/admin-portal"])' > admin-portal-changed
-          if grep -q "false" admin-portal-changed; then
-            echo "::set-output name=affected::false"
-          else
-            echo "::set-output name=affected::true"
-          fi
-
-      - name: Check if changes affect candidate-portal
-        id: check-candidate-portal
-        run: |
-          echo "${{ steps.changed-files.outputs.files }}" | jq 'contains(["ui/candidate-portal"])' > candidate-portal-changed
-          if grep -q "false" candidate-portal-changed; then
-            echo "::set-output name=affected::false"
-          else
-            echo "::set-output name=affected::true"
-          fi
-
-      - name: Comment on PR if no relevant changes
+      - name: Get Amplify preview URL from comment
+        id: get-preview-url
         uses: actions/github-script@v6
         with:
           script: |
-            const adminPortalChanged = ${{ steps.check-admin-portal.outputs.affected }};
-            const candidatePortalChanged = ${{ steps.check-candidate-portal.outputs.affected }};
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            // Find a comment that starts with "aws-amplify" and contains a URL
+            const amplifyComment = comments.find(comment => comment.body.startsWith("aws-amplify"));
+            if (!amplifyComment) {
+              core.setFailed("No Amplify preview URL found in comments.");
+              return;
+            }
+
+            // Extract URL from the comment
+            const urlMatch = amplifyComment.body.match(/https?:\/\/[^\s]+/);
+            if (!urlMatch) {
+              core.setFailed("Amplify preview URL not found in the comment.");
+              return;
+            }
             
-            if (adminPortalChanged === 'false' && candidatePortalChanged === 'false') {
-              github.rest.issues.createComment({
+            // Set the URL as an output variable
+            core.setOutput("preview_url", urlMatch[0]);
+
+      - name: Check preview link status
+        id: check-preview
+        run: |
+          # Use the preview URL from the previous step
+          PREVIEW_URL="${{ steps.get-preview-url.outputs.preview_url }}"
+
+          # Get the HTTP status code of the preview URL
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $PREVIEW_URL)
+
+          # Set output based on the HTTP status code
+          if [ "$HTTP_STATUS" -eq "200" ]; then
+            echo "::set-output name=link_status::active"
+          else
+            echo "::set-output name=link_status::broken"
+          fi
+
+      - name: Delete or notify if preview link is broken
+        uses: actions/github-script@v6
+        if: steps.check-preview.outputs.link_status == 'broken'
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            // Find the original "aws-amplify" comment with the preview link
+            const amplifyComment = comments.find(comment => comment.body.startsWith("aws-amplify"));
+
+            if (amplifyComment) {
+              // Delete the comment if link is broken
+              await github.rest.issues.deleteComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: "No relevant changes detected for admin-portal or candidate-portal. Preview builds are not required for this PR."
+                comment_id: amplifyComment.id,
               });
             }
+
+            // Post a new comment about the broken link
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "⚠️ The AWS Amplify PR preview link is broken and not accessible.",
+            });
