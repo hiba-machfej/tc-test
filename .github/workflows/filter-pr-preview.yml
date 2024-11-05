@@ -9,9 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pause to allow Amplify deployment
-        run: sleep 180  # Waits for 3 minutes for AWS Amplify to complete deployment
-
+    
       - name: Get Amplify preview URL from comment
         id: get-preview-url
         uses: actions/github-script@v6
