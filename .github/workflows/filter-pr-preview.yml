@@ -20,64 +20,73 @@ jobs:
               repo: context.repo.repo,
             });
 
-            // Find a comment that starts with "aws-amplify" and contains a URL
-            const amplifyComment = comments.find(comment => comment.body.startsWith("aws-amplify"));
+            // Look for the comment from "aws-amplify" with the specific URL format
+            const amplifyComment = comments.find(comment => 
+              comment.user.login.startsWith("aws-amplify") &&
+              comment.body.includes("Access this pull request here:")
+            );
+
             if (!amplifyComment) {
               core.setFailed("No Amplify preview URL found in comments.");
               return;
             }
 
-            // Extract URL from the comment
+            // Extract the URL from the comment
             const urlMatch = amplifyComment.body.match(/https?:\/\/[^\s]+/);
             if (!urlMatch) {
               core.setFailed("Amplify preview URL not found in the comment.");
               return;
             }
-            
+
             // Set the URL as an output variable
             core.setOutput("preview_url", urlMatch[0]);
+            core.setOutput("comment_id", amplifyComment.id);
 
-      - name: Check preview link status
-        id: check-preview
+      - name: Wait for preview link to become active
+        id: wait-for-link
         run: |
-          # Use the preview URL from the previous step
           PREVIEW_URL="${{ steps.get-preview-url.outputs.preview_url }}"
+          MAX_ATTEMPTS=20  # Max number of attempts
+          SLEEP_INTERVAL=30  # Seconds between checks
+          ATTEMPTS=0
 
-          # Get the HTTP status code of the preview URL
-          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $PREVIEW_URL)
+          while [ "$ATTEMPTS" -lt "$MAX_ATTEMPTS" ]; do
+            HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $PREVIEW_URL)
 
-          # Set output based on the HTTP status code
-          if [ "$HTTP_STATUS" -eq "200" ]; then
-            echo "::set-output name=link_status::active"
-          else
-            echo "::set-output name=link_status::broken"
-          fi
+            if [ "$HTTP_STATUS" -eq "200" ]; then
+              echo "::set-output name=link_status::active"
+              exit 0
+            fi
+
+            # Increment the attempt counter
+            ATTEMPTS=$((ATTEMPTS + 1))
+            echo "Attempt $ATTEMPTS: Preview link not active yet, waiting..."
+
+            # Wait for the next interval before checking again
+            sleep $SLEEP_INTERVAL
+          done
+
+          # If loop exits, link is still broken after max attempts
+          echo "::set-output name=link_status::broken"
 
       - name: Delete or notify if preview link is broken
         uses: actions/github-script@v6
-        if: steps.check-preview.outputs.link_status == 'broken'
+        if: steps.wait-for-link.outputs.link_status == 'broken'
         with:
           script: |
-            const { data: comments } = await github.rest.issues.listComments({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
+            const commentId = ${{ steps.get-preview-url.outputs.comment_id }};
 
-            // Find the original "aws-amplify" comment with the preview link
-            const amplifyComment = comments.find(comment => comment.body.startsWith("aws-amplify"));
-
-            if (amplifyComment) {
-              // Delete the comment if link is broken
+            // Delete the original comment if the link is broken
+            if (commentId) {
               await github.rest.issues.deleteComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                comment_id: amplifyComment.id,
+                comment_id: commentId,
               });
             }
 
-            // Post a new comment about the broken link
+            // Post a new comment indicating the broken link
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
