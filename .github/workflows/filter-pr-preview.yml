@@ -39,15 +39,18 @@ jobs:
             echo "::set-output name=affected::true"
           fi
 
-      - name: Post comment on PR
-        if: ${{ steps.check-admin-portal.outputs.affected == 'false' && steps.check-candidate-portal.outputs.affected == 'false' }}
+      - name: Comment on PR if no relevant changes
         uses: actions/github-script@v6
         with:
           script: |
-            const { github, context } = require('@actions/github');
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "No relevant changes detected for admin-portal or candidate-portal. Consider skipping preview builds for this PR."
-            })
+            const adminPortalChanged = ${{ steps.check-admin-portal.outputs.affected }};
+            const candidatePortalChanged = ${{ steps.check-candidate-portal.outputs.affected }};
+            
+            if (adminPortalChanged === 'false' && candidatePortalChanged === 'false') {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: "No relevant changes detected for admin-portal or candidate-portal. Preview builds are not required for this PR."
+              });
+            }
