@@ -11,11 +11,11 @@ jobs:
     steps:
       - name: Wait before proceeding
         run: |
-          echo "Waiting for 1 minute and 30 seconds before checking the preview link..."
-          sleep 180
+          echo "Waiting for 1 minute and 30 seconds before checking the preview links..."
+          sleep 90
 
-      - name: Get Amplify preview URL from comment
-        id: get-preview-url
+      - name: Get Amplify preview URLs from comments
+        id: get-preview-urls
         uses: actions/github-script@v6
         with:
           script: |
@@ -25,54 +25,66 @@ jobs:
               repo: context.repo.repo,
             });
 
-            // Find the comment from "aws-amplify" containing the preview link
-            const amplifyComment = comments.find(comment => 
+            // Filter comments from "aws-amplify" containing the preview link
+            const amplifyComments = comments.filter(comment => 
               comment.user.login.startsWith("aws-amplify") &&
               comment.body.includes("Access this pull request here:")
             );
 
-            if (!amplifyComment) {
-              core.setFailed("No Amplify preview URL found in comments.");
+            if (amplifyComments.length === 0) {
+              core.setFailed("No Amplify preview URLs found in comments.");
               return;
             }
 
-            // Extract the URL from the comment
-            const urlMatch = amplifyComment.body.match(/https?:\/\/[^\s]+/);
-            if (!urlMatch) {
-              core.setFailed("Amplify preview URL not found in the comment.");
+            const urls = amplifyComments.map(comment => {
+              const urlMatch = comment.body.match(/https?:\/\/[^\s]+/);
+              return {
+                url: urlMatch ? urlMatch[0] : null,
+                id: comment.id
+              };
+            }).filter(item => item.url); // Remove null URLs
+
+            if (urls.length === 0) {
+              core.setFailed("No valid Amplify preview URLs found in comments.");
               return;
             }
 
-            // Set the URL and comment ID as output variables
-            core.setOutput("preview_url", urlMatch[0]);
-            core.setOutput("comment_id", amplifyComment.id);
+            core.setOutput("urls", JSON.stringify(urls));
 
-      - name: Check if preview link is reachable
-        id: check-link
+      - name: Check if preview links are reachable
+        id: check-links
         run: |
-          PREVIEW_URL="${{ steps.get-preview-url.outputs.preview_url }}"
-          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" $PREVIEW_URL)
+          urls='${{ steps.get-preview-urls.outputs.urls }}'
+          broken_urls=()
+          echo "Checking each preview link for status..."
 
-          if [ "$HTTP_STATUS" -eq "200" ]; then
-            echo "::set-output name=link_status::active"
-          else
-            echo "::set-output name=link_status::broken"
-          fi
+          for item in $(echo "$urls" | jq -c '.[]'); do
+            url=$(echo "$item" | jq -r '.url')
+            comment_id=$(echo "$item" | jq -r '.id')
 
-      - name: Delete or notify if preview link is broken
+            HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "$url")
+            
+            if [ "$HTTP_STATUS" -ne "200" ]; then
+              broken_urls+=("$comment_id")
+            fi
+          done
+
+          echo "::set-output name=broken_ids::${broken_urls[@]}"
+
+      - name: Delete or notify if any preview link is broken
         uses: actions/github-script@v6
-        if: steps.check-link.outputs.link_status == 'broken'
+        if: steps.check-links.outputs.broken_ids != ''
         with:
-          github-token: ${{ secrets.PAT_TOKEN }}  # Use the PAT instead of default GITHUB_TOKEN
+          github-token: ${{ secrets.PAT_TOKEN }}
           script: |
-            const commentId = ${{ steps.get-preview-url.outputs.comment_id }};
-
-            // Delete the original Amplify comment if the link is broken
-            if (commentId) {
-              await github.rest.issues.deleteComment({
+            const brokenIds = "${{ steps.check-links.outputs.broken_ids }}".split(" ");
+            const promises = brokenIds.map(commentId =>
+              github.rest.issues.deleteComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                comment_id: commentId,
-              });
-            }
+                comment_id: parseInt(commentId),
+              })
+            );
+
+            await Promise.all(promises);
