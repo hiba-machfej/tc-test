@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Wait before proceeding
+        run: |
+          echo "Waiting for 1 minute and 30 seconds before checking the preview link..."
+          sleep 90
+
       - name: Get Amplify preview URL from comment
         id: get-preview-url
         uses: actions/github-script@v6
