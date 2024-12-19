@@ -27,8 +27,8 @@ export const environment = {
   systemApiUrl: 'http://localhost:8080/api/system',
   s3BucketUrl: 'https://s3.us-east-1.amazonaws.com/dev.files.tbbtalent.org',
   assetBaseUrl: '',
-  // clarityProjectId: 'pf9pa20gai',
-  // hotjarId: '5243813'
+  clarityProjectId: 'pf9pa20gai',
+  hotjarId: '5243813'
 };
 
 /*

@@ -56,23 +56,23 @@ export class AppComponent implements OnInit {
 
     this.subscribeForTitleChanges()
 
-    //  // Initialize Clarity with your Project ID
-    //  Clarity.init(environment.clarityProjectId); 
+     // Initialize Clarity with your Project ID
+     Clarity.init(environment.clarityProjectId); 
 
-    //  injectContentsquareScript({
-    //   siteId: environment.hotjarId, // Required: Your site ID from Contentsquare
-    //   async: true, // Optional: Set to false to wait for script execution until after document parsing.
-    //   defer: false // Optional: Set to true to defer script execution after document parsing.
-    // });
+     injectContentsquareScript({
+      siteId: environment.hotjarId, // Required: Your site ID from Contentsquare
+      async: true, // Optional: Set to false to wait for script execution until after document parsing.
+      defer: false // Optional: Set to true to defer script execution after document parsing.
+    });
 
-    //  // Track page views on router changes
-    //  this.router.events.subscribe(event => {
-    //    if (event instanceof NavigationEnd) {
-    //      // Track page views manually
-    //      Clarity.event('PageView');
-    //      console.log('Clarity tracked page view for:', event.urlAfterRedirects);
-    //    }
-    //  });
+     // Track page views on router changes
+     this.router.events.subscribe(event => {
+       if (event instanceof NavigationEnd) {
+         // Track page views manually
+         Clarity.event('PageView');
+         console.log('Clarity tracked page view for:', event.urlAfterRedirects);
+       }
+     });
 
   
   }
