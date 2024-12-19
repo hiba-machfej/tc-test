@@ -22,9 +22,9 @@ import {AuthenticationService} from "../services/authentication.service";
 import {User} from "../model/user";
 import {Subscription} from "rxjs";
 import {ChatService} from "../services/chat.service";
-// import Clarity from '@microsoft/clarity';
-// import { environment } from '../../environments/environment';
-// import { injectContentsquareScript } from '@contentsquare/tag-sdk';
+import Clarity from '@microsoft/clarity';
+import { environment } from '../../environments/environment';
+import { injectContentsquareScript } from '@contentsquare/tag-sdk';
 
 @Component({
   selector: 'app-root',
