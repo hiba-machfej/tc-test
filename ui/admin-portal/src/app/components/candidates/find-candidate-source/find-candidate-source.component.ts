@@ -1,10 +1,36 @@
-import {Component, EventEmitter, Input, OnInit, Output,} from '@angular/core';
+/*
+ * Copyright (c) 2024 Talent Catalog.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import {Observable, of, Subject} from "rxjs";
 import {catchError, debounceTime, distinctUntilChanged, map, switchMap, tap} from "rxjs/operators";
 import {CandidateSourceService} from "../../../services/candidate-source.service";
 import {
   CandidateSource,
   CandidateSourceType,
+  DtoType,
+  IdsRequest,
   SearchCandidateSourcesRequest
 } from "../../../model/base";
 
@@ -19,14 +45,11 @@ import {
   templateUrl: './find-candidate-source.component.html',
   styleUrls: ['./find-candidate-source.component.scss']
 })
-export class FindCandidateSourceComponent implements OnInit {
+export class FindCandidateSourceComponent implements OnInit, OnChanges {
   //Whether single selection only - default is multiple selection allowed
   @Input() single: boolean = false;
   @Input() sourceType: CandidateSourceType;
-  @Input() id: number;
-
-  //todo could live with single ids Input - rather than having two alternate inputs.
-  @Input() ids: number[] | number;
+  @Input() selectedIds: number[] | number;
   @Input() fixed: boolean;
   @Input() global: boolean;
   @Input() owned: boolean;
@@ -50,32 +73,25 @@ export class FindCandidateSourceComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadExistingSelection();
+    this.loadSources();
   }
 
-  private loadExistingSelection() {
+  ngOnChanges(changes: SimpleChanges): void {
+    this.changeSelection();
+  }
+
+  private changeSelection() {
     //If there is already a source associated set the selection to it, otherwise clear selection.
-    if (this.single && this.id) {
-      this.candidateSourceService.get(this.sourceType, this.id).subscribe({
-        next: source => {
-          this.setCurrentSelection([source]);
-          this.loadSources();
+    if (this.selectedIds) {
+      let idsRequest: IdsRequest = Array.isArray(this.selectedIds) ? {ids: this.selectedIds} : {ids: [this.selectedIds]};
+      idsRequest.dtoType = DtoType.MINIMAL;
+      this.candidateSourceService.searchByIds(this.sourceType, idsRequest).subscribe({
+        next: (sources: CandidateSource[])  => {
+          this.setCurrentSelection(sources);
         }
       });
-    } else if (!this.single && this.ids) {
-      //todo This needs to allow multiple initial values  - need getShortInfos IdsRequest
-      // const idsRequest = {
-      //   ids: this.ids
-      // }
-      // this.candidateSourceService.getShortInfos(this.sourceType, idsRequest).subscribe({
-      //   next: (sources: CandidateSource[])  => {
-      //     this.setCurrentSelection(sources);
-      //     this.loadSources();
-      //   }
-      // });
     } else {
       this.clearSelection()
-      this.loadSources();
     }
   }
 
@@ -107,6 +123,7 @@ export class FindCandidateSourceComponent implements OnInit {
       return of([]);
     } else {
       let request: SearchCandidateSourcesRequest = {
+        dtoType: DtoType.MINIMAL,
         keyword: text,
         pageSize: 10,
         fixed: this.fixed,

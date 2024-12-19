@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Talent Beyond Boundaries.
+ * Copyright (c) 2024 Talent Catalog.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -15,7 +15,7 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from "@angular/forms";
 import {ActivatedRoute, Router} from "@angular/router";
 import {LoginRequest} from "../../model/base";
 import {User} from "../../model/user";
@@ -24,6 +24,7 @@ import {ShowQrCodeComponent} from "../util/qr/show-qr-code/show-qr-code.componen
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {AuthenticationService} from "../../services/authentication.service";
 import {environment} from "../../../environments/environment";
+import Clarity from '@microsoft/clarity';
 
 @Component({
   selector: 'app-login',
@@ -32,14 +33,14 @@ import {environment} from "../../../environments/environment";
 })
 export class LoginComponent implements OnInit {
 
-  loginForm: FormGroup;
+  loginForm: UntypedFormGroup;
   loading: boolean;
   returnUrl: string;
   error;
 
   backgroundImage: string;
 
-  constructor(private builder: FormBuilder,
+  constructor(private builder: UntypedFormBuilder,
               private authenticationService: AuthenticationService,
               private modalService: NgbModal,
               private route: ActivatedRoute,
@@ -101,11 +102,19 @@ export class LoginComponent implements OnInit {
       .subscribe(() => {
         this.loading = false;
         this.checkMfaSetup();
+
+        Clarity.identify(
+          this.username,    // Unique user ID
+        );
+        console.log('Clarity Identify API called with user data:', this.username);
+
       }, error => {
         // console.log(error);
         this.error = error;
         this.loading = false;
       });
+
+      
 
   }
 

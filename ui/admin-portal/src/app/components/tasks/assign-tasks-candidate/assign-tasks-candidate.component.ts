@@ -1,8 +1,27 @@
+/*
+ * Copyright (c) 2024 Talent Catalog.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
 import {Component, OnInit} from '@angular/core';
 import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {TaskService} from "../../../services/task.service";
-import {CreateTaskAssignmentRequest, TaskAssignmentService} from "../../../services/task-assignment.service";
+import {
+  CreateTaskAssignmentRequest,
+  TaskAssignmentService
+} from "../../../services/task-assignment.service";
 import {TaskAssignment} from "../../../model/task-assignment";
 import {Task} from "../../../model/task";
 
@@ -12,7 +31,7 @@ import {Task} from "../../../model/task";
   styleUrls: ['./assign-tasks-candidate.component.scss']
 })
 export class AssignTasksCandidateComponent implements OnInit {
-  assignForm: FormGroup;
+  assignForm: UntypedFormGroup;
   candidateId: number;
   allTasks: Task[];
   loading;
@@ -21,7 +40,7 @@ export class AssignTasksCandidateComponent implements OnInit {
   estDate: Date;
 
   constructor(private activeModal: NgbActiveModal,
-              private fb: FormBuilder,
+              private fb: UntypedFormBuilder,
               private modalService: NgbModal,
               private taskService: TaskService,
               private taskAssignmentService: TaskAssignmentService) { }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Talent Beyond Boundaries.
+ * Copyright (c) 2024 Talent Catalog.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -37,7 +37,6 @@ import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {JwtInterceptor} from './services/jwt.interceptor';
 import {ErrorInterceptor} from './services/error.interceptor';
 import {AuthorizationService} from './services/authorization.service';
-import {LocalStorageModule} from 'angular-2-local-storage';
 import {LoginComponent} from './components/login/login.component';
 import {SettingsComponent} from './components/settings/settings.component';
 import {SearchUsersComponent} from './components/settings/users/search-users.component';
@@ -233,7 +232,7 @@ import {
 import {
   BrowseCandidateSourcesComponent
 } from './components/candidates/show/browse/browse-candidate-sources.component';
-import {ChartsModule} from 'ng2-charts';
+import {NgChartsModule} from 'ng2-charts';
 import {InfographicComponent} from './components/infographics/infographic.component';
 import {ChartComponent} from './components/infographics/chart/chart.component';
 import {MonthPickerComponent} from './components/util/month-picker/month-picker.component';
@@ -794,7 +793,19 @@ import {
   EditCandidateExamComponent
 } from "./components/candidates/view/exam/edit/edit-candidate-exam.component";
 import {JoiDataComponent} from './components/job/intake/joi-data/joi-data.component';
-import {FindCandidateSourceComponent} from './components/candidates/find-candidate-source/find-candidate-source.component';
+import {
+  FindCandidateSourceComponent
+} from './components/candidates/find-candidate-source/find-candidate-source.component';
+import {UnsavedChangesGuard} from "./services/unsaved-changes.guard";
+import {
+  PotentialDuplicateIconComponent
+} from './components/candidates/potential-duplicates/potential-duplicate-icon/potential-duplicate-icon.component';
+import {
+  DuplicatesDetailComponent
+} from './components/candidates/potential-duplicates/duplicates-detail/duplicates-detail.component';
+import {
+  ImportDuolingoCouponsComponent
+} from "./components/settings/import-duolingo-coupons/import-duolingo-coupons.component";
 
 @NgModule({
   declarations: [
@@ -1115,7 +1126,10 @@ import {FindCandidateSourceComponent} from './components/candidates/find-candida
     CreateCandidateExamComponent,
     EditCandidateExamComponent,
     JoiDataComponent,
-    FindCandidateSourceComponent
+    FindCandidateSourceComponent,
+    PotentialDuplicateIconComponent,
+    DuplicatesDetailComponent,
+    ImportDuolingoCouponsComponent
   ],
   imports: [
     BrowserModule,
@@ -1125,14 +1139,10 @@ import {FindCandidateSourceComponent} from './components/candidates/find-candida
     NgbModule,
     FormsModule,
     InfiniteScrollModule,
-    ChartsModule,
+    NgChartsModule,
     NgxWigModule,
     NgSelectModule,
     DirectiveModule,
-    LocalStorageModule.forRoot({
-      prefix: 'tbb-admin',
-      storageType: 'localStorage'
-    }),
     DragulaModule.forRoot(),
     QuillModule.forRoot(),
     PickerModule,
@@ -1158,6 +1168,7 @@ import {FindCandidateSourceComponent} from './components/candidates/find-candida
     {provide: RxStompService},
     AuthorizationService,
     RoleGuardService,
+    UnsavedChangesGuard,
     Title,
     DatePipe, TitleCasePipe
   ],

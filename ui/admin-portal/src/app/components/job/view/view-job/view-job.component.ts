@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2024 Talent Catalog.
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
+
 import {
   Component,
   EventEmitter,
@@ -12,7 +28,6 @@ import {NgbModal, NgbNavChangeEvent} from "@ng-bootstrap/ng-bootstrap";
 import {MainSidePanelBase} from "../../../util/split/MainSidePanelBase";
 import {User} from "../../../../model/user";
 import {AuthorizationService} from "../../../../services/authorization.service";
-import {LocalStorageService} from "angular-2-local-storage";
 import {SalesforceService} from "../../../../services/salesforce.service";
 import {JobService} from "../../../../services/job.service";
 import {SlackService} from "../../../../services/slack.service";
@@ -39,6 +54,7 @@ import {ChatService} from "../../../../services/chat.service";
 import {PartnerService} from "../../../../services/partner.service";
 import {Partner} from "../../../../model/partner";
 import {JobOppIntake} from "../../../../model/job-opp-intake";
+import {LocalStorageService} from "../../../../services/local-storage.service";
 
 /**
  * Display details of a job object passed in as an @Input.
@@ -347,4 +363,9 @@ export class ViewJobComponent extends MainSidePanelBase implements OnInit, OnCha
   onIntakeChanged(joi: JobOppIntake) {
     this.job.jobOppIntake = joi;
   }
+
+  public canSeeJobDetails() {
+    return this.authorizationService.canSeeJobDetails()
+  }
+
 }

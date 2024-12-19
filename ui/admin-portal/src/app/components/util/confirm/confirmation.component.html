@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) 2021 Talent Beyond Boundaries.
+  ~ Copyright (c) 2024 Talent Catalog.
   ~
   ~ This program is free software: you can redistribute it and/or modify it under
   ~ the terms of the GNU Affero General Public License as published by the Free
@@ -34,10 +34,10 @@
 </div>
 
 <div class="modal-footer">
+  <button *ngIf="showCancel" type="button" class="btn btn-accent-2" (click)="dismiss()">
+    Cancel
+  </button>
   <button type="button" class="btn btn-primary" (click)="close()">
     Ok
-  </button>
-  <button *ngIf="showCancel" type="button" class="btn btn-primary" (click)="dismiss()">
-    Cancel
   </button>
 </div>

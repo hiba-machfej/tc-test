@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Talent Beyond Boundaries.
+ * Copyright (c) 2024 Talent Catalog.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -22,6 +22,9 @@ import {AuthenticationService} from "../services/authentication.service";
 import {User} from "../model/user";
 import {Subscription} from "rxjs";
 import {ChatService} from "../services/chat.service";
+// import Clarity from '@microsoft/clarity';
+// import { environment } from '../../environments/environment';
+// import { injectContentsquareScript } from '@contentsquare/tag-sdk';
 
 @Component({
   selector: 'app-root',
@@ -44,6 +47,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
 
+
     this.authenticationService.loggedInUser$.subscribe(
       (user) => {
         this.onChangedLogin(user);
@@ -51,6 +55,26 @@ export class AppComponent implements OnInit {
     )
 
     this.subscribeForTitleChanges()
+
+    //  // Initialize Clarity with your Project ID
+    //  Clarity.init(environment.clarityProjectId); 
+
+    //  injectContentsquareScript({
+    //   siteId: environment.hotjarId, // Required: Your site ID from Contentsquare
+    //   async: true, // Optional: Set to false to wait for script execution until after document parsing.
+    //   defer: false // Optional: Set to true to defer script execution after document parsing.
+    // });
+
+    //  // Track page views on router changes
+    //  this.router.events.subscribe(event => {
+    //    if (event instanceof NavigationEnd) {
+    //      // Track page views manually
+    //      Clarity.event('PageView');
+    //      console.log('Clarity tracked page view for:', event.urlAfterRedirects);
+    //    }
+    //  });
+
+  
   }
 
   private onChangedLogin(user: User) {
@@ -101,4 +125,6 @@ export class AppComponent implements OnInit {
       }
     );
   }
+
+  
 }

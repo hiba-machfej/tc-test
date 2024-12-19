@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Talent Beyond Boundaries.
+ * Copyright (c) 2024 Talent Catalog.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -32,17 +32,15 @@ import {
   UpdateCandidateStatusInfo,
   UpdateCandidateStatusRequest
 } from '../../../model/candidate';
-import {CandidateService} from '../../../services/candidate.service';
-import {SearchResults} from '../../../model/search-results';
+import {CandidateService, DownloadCVRequest} from '../../../services/candidate.service';
 import {NgbModal, NgbOffcanvasRef} from '@ng-bootstrap/ng-bootstrap';
-import {CreateFromDefaultSavedSearchRequest, SavedSearchService} from '../../../services/saved-search.service';
+import {SavedSearchService} from '../../../services/saved-search.service';
 import {Observable, of, Subscription} from 'rxjs';
 import {CandidateReviewStatusItem} from '../../../model/candidate-review-status-item';
 import {HttpClient} from '@angular/common/http';
 import {
   ClearSelectionRequest,
   getCandidateSourceExternalHref,
-  getCandidateSourceNavigation,
   getCandidateSourceStatsNavigation,
   getCandidateSourceType,
   getSavedSearchBreadcrumb,
@@ -63,7 +61,7 @@ import {
   Status
 } from '../../../model/base';
 import {CandidateSourceResultsCacheService} from '../../../services/candidate-source-results-cache.service';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup} from '@angular/forms';
 import {User} from '../../../model/user';
 import {AuthorizationService} from '../../../services/authorization.service';
 import {SelectListComponent, TargetListSelection} from '../../list/select/select-list.component';
@@ -81,7 +79,6 @@ import {
   UpdateExplicitSavedListContentsRequest
 } from '../../../model/saved-list';
 import {CandidateSourceCandidateService} from '../../../services/candidate-source-candidate.service';
-import {LocalStorageService} from 'angular-2-local-storage';
 import {
   EditCandidateReviewStatusItemComponent
 } from '../../util/candidate-review/edit/edit-candidate-review-status-item.component';
@@ -108,6 +105,7 @@ import {getOpportunityStageName, OpportunityIds} from "../../../model/opportunit
 import {AuthenticationService} from "../../../services/authentication.service";
 import {DownloadCvComponent} from "../../util/download-cv/download-cv.component";
 import {CandidateSourceBaseComponent} from "./candidate-source-base";
+import {LocalStorageService} from "../../../services/local-storage.service";
 
 interface CachedTargetList {
   sourceID: number;
@@ -127,14 +125,15 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
 
   @Input() manageScreenSplits: boolean = true;
   @Input() showBreadcrumb: boolean = true;
-  @Input() pageNumber: number;
-  @Input() pageSize: number;
+  @Input() declare pageNumber: number;
+  @Input() declare pageSize: number;
   @Input() searchRequest: SearchCandidateRequestPaged;
   @Output() candidateSelection = new EventEmitter();
   @Output() editSource = new EventEmitter();
+  @Input() selectedCandidates: Candidate[];
+  @Output() selectedCandidatesChange = new EventEmitter<Candidate[]>();
 
   loading: boolean;
-  searching: boolean;
   closing: boolean;
   adding: boolean;
   exporting: boolean;
@@ -147,11 +146,10 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
   updatingTasks: boolean;
   savingSelection: boolean;
   showDescription: boolean = false;
-  searchForm: FormGroup;
+  searchForm: UntypedFormGroup;
   monitoredTask: Task;
   tasksAssignedToList: Task[];
 
-  results: SearchResults<Candidate>;
   subscription: Subscription;
   sortField = 'id';
   sortDirection = 'DESC';
@@ -165,13 +163,11 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
   statuses: string[];
 
   currentCandidate: Candidate;
-  private selectedCandidates: Candidate[];
   loggedInUser: User;
   targetListName: string;
   targetListId: number;
   targetListReplace: boolean;
   savedSelection: boolean;
-  timestamp: number;
   savedSearchSelectionChange: boolean;
 
   /**
@@ -195,7 +191,7 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
   sideProfile: NgbOffcanvasRef;
 
   constructor(private http: HttpClient,
-              private fb: FormBuilder,
+              private fb: UntypedFormBuilder,
               private candidateService: CandidateService,
               private candidateSourceService: CandidateSourceService,
               private savedSearchService: SavedSearchService,
@@ -227,7 +223,19 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
 
     this.setCurrentCandidate(null);
     this.loggedInUser = this.authenticationService.getLoggedInUser();
-    this.selectedCandidates = [];
+    if (this.isSavedSearch()) {
+       this.savedListCandidateService.getSelectionListCandidates(this.candidateSource.id).subscribe(
+        (result) => {
+          this.selectedCandidates = result;
+          this.selectedCandidatesChange.emit(result);
+        },
+        (error) => {
+          this.error = error;
+        }
+      )
+    } else {
+      this.selectedCandidates = [];
+    }
 
     this.statuses = [
       ReviewStatus[ReviewStatus.rejected],
@@ -292,6 +300,10 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
     return ReviewStatus;
   }
 
+  get numberSelections() {
+    return this.selectedCandidates.length;
+  }
+
   subscribeToFilterChanges(): void {
     this.searchForm.valueChanges
       .pipe(
@@ -346,12 +358,17 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
         }
       }
     }
+    // If there is a search request associated (saved search view) and the saved search request changes, update the search.
     if (changes.searchRequest) {
       if (changes.searchRequest.previousValue !== changes.searchRequest.currentValue) {
         if (this.searchRequest) {
           this.updatedSearch();
         }
       }
+    }
+    // If the selected candidates is cleared via the parent define search component, trigger a refresh to update the selects.
+    if (changes.selectedCandidates && changes.selectedCandidates.currentValue?.length == 0 && !changes.selectedCandidates.firstChange) {
+      this.doSearch(true);
     }
   }
 
@@ -369,15 +386,7 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
    * True if any candidates are currently selected.
    */
   isSelection(): boolean {
-    let isSelection: boolean;
-    if (isSavedSearch(this.candidateSource)) {
-      //Saved searches handle selections differently - they need a server request to check
-      //selections - so we need to manage that a bit more efficiently.
-      isSelection = true;
-    } else {
-      isSelection = this.selectedCandidates != null && this.selectedCandidates.length > 0;
-    }
-    return isSelection;
+    return this.selectedCandidates != null && this.selectedCandidates.length > 0;
   }
 
   ngOnDestroy(): void {
@@ -460,11 +469,12 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
         //Run the saved list or saved search as stored on the server.
         this.performSearch(
           this.pageSize,
-          DtoType.FULL,
+          DtoType.EXTENDED,
           this.keyword,
           this.showClosedOpps).subscribe(() => {
-            // Restore the selection prior to the search
-            this.setCurrentCandidate(saveCurrentCandidate);
+          // Restore the selection prior to the search using the updated results (otherwise updated fields won't appear)
+          const updatedCurrentCandidate = this.results.content.find(c => c.id == saveCurrentCandidate?.id);
+          this.setCurrentCandidate(updatedCurrentCandidate);
           }, error => {
             // Error is already displayed in the UI
           }
@@ -701,21 +711,40 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
 
   /**
    * Lightly adapted version of {@link ViewCandidateComponent.downloadGeneratedCV}.
-   * Opens {@link DownloadCvComponent} modal that returns CV generated from candiate profile.
+   * Opens {@link DownloadCvComponent} modal that returns CV generated from candidate profile.
    */
-  downloadGeneratedCV(candidate) {
-    // Modal
-    const downloadCVModal = this.modalService.open(DownloadCvComponent, {
-      centered: true,
-      backdrop: 'static'
-    });
+  downloadGeneratedCV(candidate: Candidate) {
+    if (this.canViewCandidateName()) {
+        // Modal
+        const downloadCVModal = this.modalService.open(DownloadCvComponent, {
+          centered: true,
+          backdrop: 'static'
+        });
 
-    downloadCVModal.componentInstance.candidateId = candidate.id;
+        downloadCVModal.componentInstance.candidateId = candidate.id;
 
-    downloadCVModal.result
-    .then((result) => {
-    })
-    .catch(() => { /* Isn't possible */ });
+        downloadCVModal.result
+        .then((result) => {
+        })
+        .catch(() => { /* Isn't possible */ });
+
+    } else {
+      // No modal giving option to view name and contact details - straight to anonymised DL
+      const request: DownloadCVRequest = {
+        candidateId: candidate.id,
+        showName: false,
+        showContact: false
+      }
+      const tab = window.open();
+      this.candidateService.downloadCv(request).subscribe(
+        result => {
+          tab.location.href = URL.createObjectURL(result);
+        },
+        error => {
+          this.error = error;
+        }
+      );
+    }
   }
 
   getBreadcrumb(): string {
@@ -813,14 +842,14 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
         this.savedSearchSelectionChange = selected;
         this.doSavedSearchSelection(candidate, selected);
       }
-    } else {
-      //For lists maintain local candidate selections
-      if (selected) {
-        this.selectedCandidates.push(candidate);
-      } else {
-        this.selectedCandidates = this.selectedCandidates.filter(c => c.id !== candidate.id);
-      }
     }
+    //Maintain local candidate selections
+    if (selected) {
+      this.selectedCandidates.push(candidate);
+    } else {
+      this.selectedCandidates = this.selectedCandidates.filter(c => c.id !== candidate.id);
+    }
+    this.selectedCandidatesChange.emit(this.selectedCandidates);
   }
 
   private doSavedSearchSelection(candidate: Candidate, selected: boolean) {
@@ -941,6 +970,7 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
     }
     //Switch to new selection
     this.selectedCandidates = newSelectedCandidates;
+    this.selectedCandidatesChange.emit(this.selectedCandidates);
   }
 
   private requestSaveSelection() {
@@ -983,38 +1013,7 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
 
       const savedSearch = this.candidateSource;
 
-      if (!savedSearch.defaultSearch) {
-
-        //If the search is already saved, just save the selection
-        this.saveSavedSearchSelection(savedSearch, targetListSelection);
-
-      } else {
-
-        //If default search, auto save the search, then save the selection
-
-        const ssCreateRequest: CreateFromDefaultSavedSearchRequest = {
-          savedListId: targetListSelection.savedListId,
-          name: targetListSelection.newListName,
-          jobId: targetListSelection.jobId
-        };
-        this.savedSearchService.createFromDefaultSearch(ssCreateRequest).subscribe(
-          (newSavedSearch) => {
-
-            this.saveSavedSearchSelection(newSavedSearch, targetListSelection);
-
-            //Navigate away from the default saved search to the newly created
-            //search.
-            const urlCommands = getCandidateSourceNavigation(newSavedSearch);
-            this.savingSelection = false;
-            this.router.navigate(urlCommands);
-          },
-          (error) => {
-            this.error = error;
-
-            //Even if auto saved search failed, we still want to save the selection
-            this.saveSavedSearchSelection(savedSearch, targetListSelection);
-          });
-      }
+      this.saveSavedSearchSelection(savedSearch, targetListSelection);
 
     } else {
       // LIST
@@ -1138,14 +1137,15 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
       })
   }
 
-  clearSelection() {
+  clearSelectionAndDoSearch() {
     if (isSavedSearch(this.candidateSource)) {
       const request: ClearSelectionRequest = {
         userId: this.loggedInUser.id,
       };
       this.savedSearchService.clearSelection(this.candidateSource.id, request).subscribe(
         () => {
-          this.doSearch(true);
+          // No need to do the search here as it'll be handed by the ngOnChanges trigger, if it's here it'll occur twice.
+          this.selectedCandidatesChange.emit([]);
         },
         err => {
           this.error = err;
@@ -1653,7 +1653,7 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
 
   isWatching(): boolean {
     return this.candidateSource.watcherUserIds === undefined ? false :
-      this.candidateSource.watcherUserIds.indexOf(this.loggedInUser.id) >= 0;
+      this.candidateSource.watcherUserIds.indexOf(this.loggedInUser?.id) >= 0;
   }
 
   doToggleWatch() {
@@ -1771,4 +1771,14 @@ export class ShowCandidatesComponent extends CandidateSourceBaseComponent implem
       err => {this.error = err; this.closing = false; }
     );
   }
+
+  updatedCandidate(candidate: Candidate) {
+    let index = this.results.content.findIndex(c => c.id == candidate.id)
+    this.results.content[index] = candidate;
+  }
+
+  public canViewCandidateName() {
+    return this.authorizationService.canViewCandidateName();
+  }
+
 }

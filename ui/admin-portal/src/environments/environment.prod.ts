@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Talent Beyond Boundaries.
+ * Copyright (c) 2024 Talent Catalog.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -26,5 +26,7 @@ export const environment = {
   apiUrl: '/api/admin',
   systemApiUrl: '/api/system',
   s3BucketUrl: 'https://s3.us-east-1.amazonaws.com/files.tbbtalent.org',
-  assetBaseUrl: '/admin-portal'
+  assetBaseUrl: '/admin-portal',
+  // clarityProjectId: 'pf9pa20gai',
+  // hotjarId: '5243813'
 };

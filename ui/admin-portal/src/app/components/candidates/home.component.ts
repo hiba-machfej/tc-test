@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Talent Beyond Boundaries.
+ * Copyright (c) 2024 Talent Catalog.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
@@ -18,7 +18,6 @@ import {Component, OnInit} from '@angular/core';
 import {NgbNavChangeEvent} from "@ng-bootstrap/ng-bootstrap";
 import {SavedSearchSubtype, SavedSearchType} from "../../model/saved-search";
 import {CandidateSourceType, SearchBy, SearchOppsBy} from "../../model/base"
-import {LocalStorageService} from "angular-2-local-storage";
 import {
   SavedSearchService,
   SavedSearchTypeInfo,
@@ -27,6 +26,7 @@ import {
 import {AuthorizationService} from "../../services/authorization.service";
 import {Partner} from "../../model/partner";
 import {AuthenticationService} from "../../services/authentication.service";
+import {LocalStorageService} from "../../services/local-storage.service";
 
 @Component({
   selector: 'app-home',
